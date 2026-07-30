@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --color-bg: #0d131f;
+  --color-panel: #131b2e;
+  --color-panel-alt: #1a243a;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-text: #f8fafc;
+  --color-muted: #94a3b8;
+  --bg-radial: radial-gradient(ellipse at 50% 0%, rgba(16, 185, 129, 0.08), transparent 70%), radial-gradient(ellipse at 80% 20%, rgba(56, 189, 248, 0.05), transparent 60%);
+  --card-grad-start: rgba(255, 255, 255, 0.04);
+  --card-grad-end: rgba(255, 255, 255, 0.01);
+  --font-active-display: 'Montserrat', sans-serif;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --color-bg: #f8fafc;
+  --color-panel: #ffffff;
+  --color-panel-alt: #f1f5f9;
+  --color-border: rgba(15, 23, 42, 0.12);
+  --color-text: #0f172a;
+  --color-muted: #334155;
+  --bg-radial: radial-gradient(ellipse at 50% 0%, rgba(16, 185, 129, 0.12), transparent 70%), radial-gradient(ellipse at 80% 20%, rgba(6, 182, 212, 0.08), transparent 60%);
+  --card-grad-start: #ffffff;
+  --card-grad-end: #f8fafc;
+}
+
+/* Light Mode legibility overrides */
+[data-theme='light'] .text-slate-300,
+[data-theme='light'] .text-slate-400,
+[data-theme='light'] .text-slate-200 {
+  color: #334155 !important;
+}
+
+[data-theme='light'] .text-slate-500 {
+  color: #475569 !important;
+}
+
+[data-theme='light'] .text-muted {
+  color: #475569 !important;
+}
+
+[data-theme='light'] .text-text {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .bg-white\/5,
+[data-theme='light'] .bg-white\/10,
+[data-theme='light'] .bg-white\/\[0\.03\] {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme='light'] .border-white\/5,
+[data-theme='light'] .border-white\/10,
+[data-theme='light'] .border-white\/15,
+[data-theme='light'] .border-white\/20 {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+[data-theme='light'] input,
+[data-theme='light'] select,
+[data-theme='light'] textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(15, 23, 42, 0.2) !important;
+}
+
+[data-theme='light'] input::placeholder,
+[data-theme='light'] textarea::placeholder {
+  color: #64748b !important;
+}
+
+html, body, button, input, select, textarea {
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-bg text-text antialiased min-h-screen transition-colors duration-200;
+  background-image: var(--bg-radial);
+  background-attachment: fixed;
+}
+
+* {
+  @apply border-border;
+}
+
+::selection {
+  background: rgba(16, 185, 129, 0.25);
+  color: #ffffff;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+.glass-panel {
+  @apply border border-border bg-panel backdrop-blur-xl shadow-soft;
+}
+
+.glass-card {
+  @apply border border-border bg-card-gradient backdrop-blur-md shadow-card transition-all duration-200 hover:border-accent-emerald/40 hover:shadow-emeraldGlow;
+}
+
+.focus-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-emerald focus-visible:ring-offset-2 focus-visible:ring-offset-bg;
+}
+
+@keyframes status-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.15);
+  }
+}
+
+.animate-status-pulse {
+  animation: status-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
