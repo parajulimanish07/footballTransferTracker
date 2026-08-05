@@ -13,6 +13,7 @@ export const newsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(10),
   search: z.string().trim().optional().nullable(),
   sort: z.enum(['latest', 'most_reliable']).optional().nullable(),
+  refresh: z.coerce.boolean().optional().nullable(),
 });
 
 export type NewsQueryInput = z.infer<typeof newsQuerySchema>;

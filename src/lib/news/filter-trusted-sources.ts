@@ -16,6 +16,11 @@ function getOfficialClubDomains() {
     .map((websiteUrl) => new URL(websiteUrl).hostname.replace(/^www\./, '').toLowerCase());
 }
 
+export function isOfficialClubDomain(domain: string): boolean {
+  const d = domain.toLowerCase().replace(/^www\./, '');
+  return getOfficialClubDomains().some((official) => d === official || d.endsWith(`.${official}`));
+}
+
 export function isTrustedDomain(domain: string) {
   const normalisedDomain = domain.toLowerCase();
   if (
@@ -35,7 +40,7 @@ export function isTrustedDomain(domain: string) {
     return true;
   }
 
-  return getOfficialClubDomains().includes(normalisedDomain);
+  return isOfficialClubDomain(normalisedDomain);
 }
 
 export function isTrustedSource(domain: string, journalistName: string | null) {

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const clubIds = parsed.data.club ? [getClubById(parsed.data.club)?.id ?? parsed.data.club] : undefined;
 
     try {
-        const response = await getTransferNews({ ...parsed.data, clubIds });
+        const response = await getTransferNews({ ...parsed.data, clubIds, forceRefresh: Boolean(parsed.data.refresh) });
         return NextResponse.json(response, { headers: { 'Cache-Control': 's-maxage=30, stale-while-revalidate=120' } });
     } catch {
         return NextResponse.json({ error: 'Failed to fetch verified transfer news.' }, { status: 500 });

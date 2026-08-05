@@ -33,7 +33,7 @@ export const gnewsProvider: NewsProvider = {
     url.searchParams.set('apikey', apiKey);
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
+    const timeout = setTimeout(() => controller.abort(), 3000);
 
     try {
       const response = await fetch(url.toString(), { signal: controller.signal });

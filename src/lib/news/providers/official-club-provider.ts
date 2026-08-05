@@ -18,7 +18,7 @@ export const officialClubProvider: NewsProvider = {
       targetSources.map(async (source) => {
         if (!source.feedUrl) return;
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 6000);
+        const timeout = setTimeout(() => controller.abort(), 2500);
 
         try {
           const response = await fetch(source.feedUrl, { signal: controller.signal });

@@ -28,6 +28,29 @@ const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
 const ML_CONFIDENCE_THRESHOLD = parseFloat(process.env.ML_CONFIDENCE_THRESHOLD || '0.65');
 const DUPLICATE_SIMILARITY_THRESHOLD = parseFloat(process.env.DUPLICATE_SIMILARITY_THRESHOLD || '0.82');
 
+// Circuit breaker to avoid network timeout stalls when Python ML microservice is offline
+let mlCircuitOpen = false;
+let mlCircuitNextRetry = 0;
+
+function isMlServiceAvailable(): boolean {
+  if (!mlCircuitOpen) return true;
+  if (Date.now() > mlCircuitNextRetry) {
+    mlCircuitOpen = false;
+    return true;
+  }
+  return false;
+}
+
+function recordMlServiceFailure() {
+  mlCircuitOpen = true;
+  mlCircuitNextRetry = Date.now() + 60000; // Fast-fail for 60 seconds
+}
+
+function recordMlServiceSuccess() {
+  mlCircuitOpen = false;
+  mlCircuitNextRetry = 0;
+}
+
 /**
  * Predicts transfer status using Python FastAPI ML Service, falling back gracefully to deterministic rules.
  */
@@ -49,34 +72,37 @@ export async function predictTransferStatus(options: {
     };
   }
 
-  try {
-    const response = await fetch(`${ML_SERVICE_URL}/predict-transfer-status`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        headline: options.headline,
-        description: options.description ?? '',
-        sourceDomain: options.sourceDomain ?? '',
-        isOfficial: Boolean(options.isOfficial),
-      }),
-      signal: AbortSignal.timeout(3000),
-    });
+  if (isMlServiceAvailable()) {
+    try {
+      const response = await fetch(`${ML_SERVICE_URL}/predict-transfer-status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          headline: options.headline,
+          description: options.description ?? '',
+          sourceDomain: options.sourceDomain ?? '',
+          isOfficial: Boolean(options.isOfficial),
+        }),
+        signal: AbortSignal.timeout(1000), // Fast 1s timeout
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        prediction: (data.prediction.toLowerCase() as TransferStatus) || 'interest',
-        confidence: data.confidence ?? 0.8,
-        modelVersion: data.modelVersion ?? 'ml-fastapi-v1',
-        probabilities: data.probabilities,
-        decisionScores: data.decisionScores,
-        reasoningSignals: data.reasoningSignals ?? [],
-        ruleOverride: data.ruleOverride ?? null,
-        needsReview: (data.confidence ?? 0.8) < ML_CONFIDENCE_THRESHOLD,
-      };
+      if (response.ok) {
+        recordMlServiceSuccess();
+        const data = await response.json();
+        return {
+          prediction: (data.prediction.toLowerCase() as TransferStatus) || 'interest',
+          confidence: data.confidence ?? 0.8,
+          modelVersion: data.modelVersion ?? 'ml-fastapi-v1',
+          probabilities: data.probabilities,
+          decisionScores: data.decisionScores,
+          reasoningSignals: data.reasoningSignals ?? [],
+          ruleOverride: data.ruleOverride ?? null,
+          needsReview: (data.confidence ?? 0.8) < ML_CONFIDENCE_THRESHOLD,
+        };
+      }
+    } catch {
+      recordMlServiceFailure();
     }
-  } catch {
-    // Graceful fallback to deterministic keyword classification if ML service is offline
   }
 
   return fallbackDeterministicPrediction(options.headline, options.description ?? '');

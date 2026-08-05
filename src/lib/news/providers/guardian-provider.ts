@@ -45,7 +45,7 @@ export const guardianProvider: NewsProvider = {
     url.searchParams.set('order-by', 'newest');
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 3500);
 
     try {
       const response = await fetch(url.toString(), { signal: controller.signal, headers: { Accept: 'application/json' } });

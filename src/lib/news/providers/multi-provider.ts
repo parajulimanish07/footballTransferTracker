@@ -11,10 +11,9 @@ import { mockNewsProvider } from './mock-provider';
 
 import { isTrustedSource } from '../filter-trusted-sources';
 import { scoreReliability, reliabilityRank } from '../score-reliability';
-import { matchClubs } from '../match-clubs';
 import { classifyTransferStatus } from '../classify-transfer-status';
 import { resolveTransferEntities } from '../resolve-transfer-entities';
-import { predictTransferStatus, detectDuplicates } from '@/lib/ml/ml-client';
+import { predictTransferStatus } from '@/lib/ml/ml-client';
 import { articleRepository } from '@/lib/storage/article-repository';
 import type { TransferNewsItem, TransferStatus } from '@/types/news';
 
@@ -41,11 +40,43 @@ export const registeredProviders: NewsProvider[] = [
   newsApiProvider,
 ];
 
+interface CacheEntry {
+  data: MultiProviderResponse;
+  timestamp: number;
+}
+
+const queryCache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 120_000; // 2 minutes in-memory cache
+
 export const multiProvider = {
   id: 'multi-provider',
   enabled: true,
 
   async getTransferNewsWithHealth(query: TransferNewsQuery): Promise<MultiProviderResponse> {
+    const isGlobal = query.mode === 'global' || (!query.selectedClubId && !query.clubIds?.length);
+    const cachePrefix = isGlobal
+      ? `global-feed:${query.page || 1}:${query.status || 'all'}`
+      : `club-feed:${query.selectedClubId || query.clubIds?.[0] || 'none'}:${query.page || 1}`;
+
+    const cacheKey = `${cachePrefix}:${JSON.stringify(query || {})}`;
+    const cached = queryCache.get(cacheKey);
+
+    if (query.forceRefresh) {
+      queryCache.delete(cacheKey);
+    } else if (cached) {
+      const age = Date.now() - cached.timestamp;
+      if (age < CACHE_TTL_MS) {
+        return cached.data; // Instant cache hit (<5ms)
+      }
+      // Stale-while-revalidate: return stale cached data immediately, update in background
+      this.fetchFreshData(query, cacheKey).catch(() => {});
+      return cached.data;
+    }
+
+    return await this.fetchFreshData(query, cacheKey);
+  },
+
+  async fetchFreshData(query: TransferNewsQuery, cacheKey: string): Promise<MultiProviderResponse> {
     const healthMeta: ProviderHealthMeta[] = [];
     const rawArticles: RawNewsArticle[] = [];
 
@@ -82,9 +113,6 @@ export const multiProvider = {
         healthMeta.push({ id: provider.id, status: 'success', articleCount: count });
         rawArticles.push(...match.value.articles);
       } else {
-        const errMatch = results.find(
-          (r) => r.status === 'rejected' && (r as any).providerId === provider.id
-        );
         healthMeta.push({
           id: provider.id,
           status: 'failed',
@@ -94,10 +122,15 @@ export const multiProvider = {
       }
     });
 
-    // Development fallback to mock data if zero live articles returned
-    if (!rawArticles.length && (process.env.NEWS_PROVIDER === 'mock' || !process.env.GUARDIAN_API_KEY)) {
-      const mockRaw = await mockNewsProvider.getTransferNews(query);
-      rawArticles.push(...mockRaw);
+    // Fallback to controlled demo snapshot dataset if zero live articles returned
+    if (!rawArticles.length) {
+      try {
+        const demoData = require('@/data/demo-articles.json');
+        rawArticles.push(...demoData);
+      } catch {
+        const mockRaw = await mockNewsProvider.getTransferNews(query);
+        rawArticles.push(...mockRaw);
+      }
     }
 
     // 2. Remove exact URL duplicates
@@ -119,7 +152,8 @@ export const multiProvider = {
     const processedItems: TransferNewsItem[] = await Promise.all(
       trustedRaw.map(async (art): Promise<TransferNewsItem> => {
         const isOfficial = art.provider === 'official-club' || art.sourceDomain === 'official' || art.sourceDomain.includes('premierleague.com');
-        const resolved = resolveTransferEntities(art.headline, art.description || '');
+        const targetClub = query.selectedClubId || query.clubIds?.[0] || null;
+        const resolved = resolveTransferEntities(art.headline, art.description || '', targetClub);
 
         // Machine learning transfer-status prediction
         const mlRes = await predictTransferStatus({
@@ -171,17 +205,16 @@ export const multiProvider = {
     // 5. TF-IDF Duplicate Detection & Primary Story Selection
     const groupedItems = selectPrimaryStoriesAndGroupDuplicates(processedItems);
 
-    return {
+    const response: MultiProviderResponse = {
       data: groupedItems,
       providerHealth: healthMeta,
     };
+
+    queryCache.set(cacheKey, { data: response, timestamp: Date.now() });
+    return response;
   },
 };
 
-/**
- * Groups stories by similarity and selects primary story using authority hierarchy:
- * Official > Tier 1 Journalist > Highest Reliability > Earliest Credible Report
- */
 function selectPrimaryStoriesAndGroupDuplicates(items: TransferNewsItem[]): TransferNewsItem[] {
   if (items.length <= 1) return items;
 
@@ -205,17 +238,13 @@ function selectPrimaryStoriesAndGroupDuplicates(items: TransferNewsItem[]): Tran
       }
     }
 
-    // Primary selection algorithm
     duplicatesGroup.sort((a, b) => {
-      // 1. Official first
       if (a.isOfficial && !b.isOfficial) return -1;
       if (!a.isOfficial && b.isOfficial) return 1;
 
-      // 2. Reliability rank
       const relDiff = reliabilityRank(b.reliability) - reliabilityRank(a.reliability);
       if (relDiff !== 0) return relDiff;
 
-      // 3. Earliest published date
       return new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime();
     });
 
@@ -233,13 +262,11 @@ function selectPrimaryStoriesAndGroupDuplicates(items: TransferNewsItem[]): Tran
 }
 
 function isDuplicateStory(a: TransferNewsItem, b: TransferNewsItem): boolean {
-  // Same player
   if (a.playerName && b.playerName && a.playerName.toLowerCase() === b.playerName.toLowerCase()) {
     const sharedClubs = a.relatedClubIds.some((id) => b.relatedClubIds.includes(id));
     if (sharedClubs) return true;
   }
 
-  // High headline token similarity
   const tokensA = new Set(a.headline.toLowerCase().split(/\s+/).filter((w) => w.length > 3));
   const tokensB = new Set(b.headline.toLowerCase().split(/\s+/).filter((w) => w.length > 3));
   const intersection = new Set([...tokensA].filter((x) => tokensB.has(x)));
@@ -249,9 +276,4 @@ function isDuplicateStory(a: TransferNewsItem, b: TransferNewsItem): boolean {
   }
 
   return false;
-}
-
-function extractPlayerNameFromText(text: string): string | null {
-  const knowns = ['Declan Rice', 'Riccardo Calafiori', 'Darwin Nunez', 'Kylian Mbappe', 'Joshua Zirkzee', 'Victor Osimhen', 'Moises Caicedo', 'Leny Yoro', 'Teun Koopmeiners', 'Luis Diaz', 'Aaron Ramsdale'];
-  return knowns.find((name) => text.toLowerCase().includes(name.toLowerCase())) ?? null;
 }

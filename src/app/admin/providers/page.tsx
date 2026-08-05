@@ -90,10 +90,34 @@ const mockProviderStates: ProviderStatusCard[] = [
 export default function ProviderMonitoringPage() {
   const [providers, setProviders] = useState<ProviderStatusCard[]>(mockProviderStates);
   const [refreshing, setRefreshing] = useState(false);
+  const [lastSynced, setLastSynced] = useState<string | null>(null);
+
+  async function fetchProviderStatus() {
+    setRefreshing(true);
+    try {
+      const res = await fetch('/api/admin/providers/status');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.providers && Array.isArray(data.providers)) {
+          setProviders(data.providers);
+        }
+        if (data.lastSynced) {
+          setLastSynced(new Date(data.lastSynced).toLocaleTimeString());
+        }
+      }
+    } catch {
+      // Keep existing state if fetch fails
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchProviderStatus();
+  }, []);
 
   function handleRefresh() {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+    fetchProviderStatus();
   }
 
   function handleExportDataset() {

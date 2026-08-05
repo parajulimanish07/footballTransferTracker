@@ -1,119 +1,216 @@
-import fs from 'fs';
-import path from 'path';
-import type { RawNewsArticle } from '../news/providers/provider-types';
-import type { TransferNewsItem } from '@/types/news';
+import type { TransferStatus } from '@/types/news';
+import crypto from 'crypto';
 
-export interface StoredArticleRecord extends RawNewsArticle {
-  firstFetchedAt: string;
-  lastFetchedAt: string;
-  processingStatus: 'raw' | 'processed' | 'needs_review' | 'rejected';
-  mlPrediction?: string;
-  confidence?: number;
-  reliabilityScore?: number;
-  duplicateGroupId?: string | null;
-  humanLabel?: string | null;
-  humanReviewedAt?: string | null;
-  processedNewsItem?: TransferNewsItem | null;
+export interface StoredTransferArticle {
+  id: string;
+  provider: string;
+  externalId: string | null;
+  sourceUrl: string;
+  canonicalUrl: string;
+  headline: string;
+  description: string | null;
+  cleanedText: string;
+  sourceName: string;
+  sourceDomain: string;
+  journalistName: string | null;
+  playerName: string | null;
+  currentClubId: string | null;
+  destinationClubId: string | null;
+  interestedClubId: string | null;
+  leagueId: string | null;
+  transferStatus: TransferStatus;
+  transferDirection: 'incoming' | 'outgoing' | 'related' | null;
+  reliabilityScore: number;
+  publishedAt: Date;
+  firstFetchedAt: Date;
+  lastFetchedAt: Date;
+  duplicateGroupId: string | null;
+  humanReviewed: boolean;
+  humanReviewedLabel: TransferStatus | null;
+  embeddingStatus: 'pending' | 'completed' | 'failed';
+  embeddingModel: string | null;
+  contentHash: string;
+  embedding?: number[];
 }
 
-const STORAGE_DIR = path.join(process.cwd(), '.data');
-const STORAGE_FILE = path.join(STORAGE_DIR, 'articles.json');
+export interface QueryArticleFilters {
+  playerName?: string;
+  clubIds?: string[];
+  leagueIds?: string[];
+  transferStatuses?: TransferStatus[];
+  minimumReliability?: number;
+  publishedAfter?: Date;
+  embeddingStatus?: 'pending' | 'completed' | 'failed';
+  limit?: number;
+}
 
-// In-memory cache backed by local JSON file
-let memoryStore: Map<string, StoredArticleRecord> | null = null;
+export interface TelemetryMetrics {
+  totalStoredArticles: number;
+  pendingEmbeddings: number;
+  completedEmbeddings: number;
+  failedEmbeddings: number;
+  vectorSearchLatencyMs: number;
+  retrievedCandidateAvg: number;
+  evidenceAvg: number;
+  insufficientEvidenceRate: number;
+  citationValidationFailures: number;
+}
 
-function loadStore(): Map<string, StoredArticleRecord> {
-  if (memoryStore) return memoryStore;
+export class InMemoryArticleRepository {
+  private articles = new Map<string, StoredTransferArticle>();
+  private embeddings = new Map<string, { vector: number[]; model: string; dimensions: number }>();
+  private telemetry: TelemetryMetrics = {
+    totalStoredArticles: 0,
+    pendingEmbeddings: 0,
+    completedEmbeddings: 0,
+    failedEmbeddings: 0,
+    vectorSearchLatencyMs: 0,
+    retrievedCandidateAvg: 0,
+    evidenceAvg: 0,
+    insufficientEvidenceRate: 0,
+    citationValidationFailures: 0,
+  };
 
-  memoryStore = new Map<string, StoredArticleRecord>();
-
-  try {
-    if (fs.existsSync(STORAGE_FILE)) {
-      const data = fs.readFileSync(STORAGE_FILE, 'utf-8');
-      const records: StoredArticleRecord[] = JSON.parse(data);
-      records.forEach((rec) => memoryStore!.set(rec.externalId, rec));
-    }
-  } catch (err) {
-    console.error('[ArticleRepository] Error reading articles.json:', err);
+  computeContentHash(headline: string, description: string | null): string {
+    return crypto.createHash('sha256').update(`${headline}:${description || ''}`).digest('hex');
   }
 
-  return memoryStore;
-}
+  private rawArticlesMap = new Map<string, any>();
 
-function saveStore() {
-  if (!memoryStore) return;
-  try {
-    if (!fs.existsSync(STORAGE_DIR)) {
-      fs.mkdirSync(STORAGE_DIR, { recursive: true });
-    }
-    const arrayData = Array.from(memoryStore.values());
-    fs.writeFileSync(STORAGE_FILE, JSON.stringify(arrayData, null, 2), 'utf-8');
-  } catch (err) {
-    console.error('[ArticleRepository] Error writing articles.json:', err);
+  saveRawArticle(raw: any): any {
+    const id = raw.id || raw.externalId || `raw-${Date.now()}-${Math.random()}`;
+    const stored = { ...raw, id, humanReviewed: raw.humanReviewed || false };
+    this.rawArticlesMap.set(id, stored);
+    return stored;
   }
-}
 
-export const articleRepository = {
-  get(externalId: string): StoredArticleRecord | undefined {
-    return loadStore().get(externalId);
-  },
+  getUnreviewedArticles(): any[] {
+    return Array.from(this.rawArticlesMap.values()).filter((a) => !a.humanReviewed);
+  }
 
-  getByUrl(url: string): StoredArticleRecord | undefined {
-    const store = loadStore();
-    for (const record of store.values()) {
-      if (record.sourceUrl === url) return record;
+  getExportableDataset(): any[] {
+    return Array.from(this.rawArticlesMap.values()).filter((a) => a.humanReviewed);
+  }
+
+  getHumanReviewedArticles(): any[] {
+    return this.getExportableDataset();
+  }
+
+  updateProcessedArticle(id: string, updates: any): void {
+    const raw = this.rawArticlesMap.get(id);
+    if (raw) {
+      Object.assign(raw, updates);
+      if (updates.humanLabel) {
+        raw.humanReviewed = true;
+      }
     }
-    return undefined;
-  },
+  }
 
-  getAll(): StoredArticleRecord[] {
-    return Array.from(loadStore().values());
-  },
+  async saveArticle(input: Omit<StoredTransferArticle, 'contentHash' | 'firstFetchedAt' | 'lastFetchedAt'>): Promise<StoredTransferArticle> {
+    const contentHash = this.computeContentHash(input.headline, input.description);
+    const existing = Array.from(this.articles.values()).find(
+      (a) => a.sourceUrl === input.sourceUrl || a.contentHash === contentHash
+    );
 
-  getHumanReviewedArticles(): StoredArticleRecord[] {
-    return Array.from(loadStore().values()).filter((rec) => Boolean(rec.humanLabel));
-  },
+    if (existing) {
+      existing.lastFetchedAt = new Date();
+      return existing;
+    }
 
-  saveRawArticle(raw: RawNewsArticle): StoredArticleRecord {
-    const store = loadStore();
-    const existing = store.get(raw.externalId);
-    const now = new Date().toISOString();
-
-    const record: StoredArticleRecord = {
-      ...raw,
-      firstFetchedAt: existing?.firstFetchedAt || now,
+    const now = new Date();
+    const stored: StoredTransferArticle = {
+      ...input,
+      contentHash,
+      firstFetchedAt: now,
       lastFetchedAt: now,
-      processingStatus: existing?.processingStatus || 'raw',
-      mlPrediction: existing?.mlPrediction,
-      confidence: existing?.confidence,
-      reliabilityScore: existing?.reliabilityScore,
-      duplicateGroupId: existing?.duplicateGroupId || null,
-      humanLabel: existing?.humanLabel || null,
-      humanReviewedAt: existing?.humanReviewedAt || null,
-      processedNewsItem: existing?.processedNewsItem || null,
     };
 
-    store.set(raw.externalId, record);
-    saveStore();
-    return record;
-  },
+    this.articles.set(stored.id, stored);
+    this.updateTelemetryCounters();
+    return stored;
+  }
 
-  updateProcessedArticle(
-    externalId: string,
-    update: Partial<StoredArticleRecord>
-  ): StoredArticleRecord | undefined {
-    const store = loadStore();
-    const existing = store.get(externalId);
-    if (!existing) return undefined;
+  async getArticleById(id: string): Promise<StoredTransferArticle | null> {
+    return this.articles.get(id) ?? null;
+  }
 
-    const updated: StoredArticleRecord = {
-      ...existing,
-      ...update,
-      lastFetchedAt: new Date().toISOString(),
-    };
+  async saveEmbedding(articleId: string, embedding: number[], model: string): Promise<void> {
+    const article = this.articles.get(articleId);
+    if (article) {
+      article.embedding = embedding;
+      article.embeddingStatus = 'completed';
+      article.embeddingModel = model;
+      this.embeddings.set(articleId, { vector: embedding, model, dimensions: embedding.length });
+      this.updateTelemetryCounters();
+    }
+  }
 
-    store.set(externalId, updated);
-    saveStore();
-    return updated;
-  },
-};
+  async markEmbeddingFailed(articleId: string): Promise<void> {
+    const article = this.articles.get(articleId);
+    if (article) {
+      article.embeddingStatus = 'failed';
+      this.updateTelemetryCounters();
+    }
+  }
+
+  async queryArticles(filters: QueryArticleFilters = {}): Promise<StoredTransferArticle[]> {
+    let result = Array.from(this.articles.values());
+
+    if (filters.embeddingStatus) {
+      result = result.filter((a) => a.embeddingStatus === filters.embeddingStatus);
+    }
+
+    if (filters.playerName) {
+      const p = filters.playerName.toLowerCase();
+      result = result.filter((a) => a.playerName && a.playerName.toLowerCase().includes(p));
+    }
+
+    if (filters.clubIds?.length) {
+      const cSet = new Set(filters.clubIds);
+      result = result.filter(
+        (a) =>
+          (a.currentClubId && cSet.has(a.currentClubId)) ||
+          (a.destinationClubId && cSet.has(a.destinationClubId)) ||
+          (a.interestedClubId && cSet.has(a.interestedClubId))
+      );
+    }
+
+    if (filters.leagueIds?.length) {
+      const lSet = new Set(filters.leagueIds);
+      result = result.filter((a) => a.leagueId && lSet.has(a.leagueId));
+    }
+
+    if (filters.transferStatuses?.length) {
+      const sSet = new Set(filters.transferStatuses);
+      result = result.filter((a) => sSet.has(a.transferStatus));
+    }
+
+    if (filters.minimumReliability) {
+      result = result.filter((a) => a.reliabilityScore >= filters.minimumReliability!);
+    }
+
+    if (filters.publishedAfter) {
+      result = result.filter((a) => new Date(a.publishedAt) >= filters.publishedAfter!);
+    }
+
+    if (filters.limit) {
+      result = result.slice(0, filters.limit);
+    }
+
+    return result;
+  }
+
+  async getTelemetry(): Promise<TelemetryMetrics> {
+    return this.telemetry;
+  }
+
+  private updateTelemetryCounters() {
+    const all = Array.from(this.articles.values());
+    this.telemetry.totalStoredArticles = all.length;
+    this.telemetry.pendingEmbeddings = all.filter((a) => a.embeddingStatus === 'pending').length;
+    this.telemetry.completedEmbeddings = all.filter((a) => a.embeddingStatus === 'completed').length;
+    this.telemetry.failedEmbeddings = all.filter((a) => a.embeddingStatus === 'failed').length;
+  }
+}
+
+export const articleRepository = new InMemoryArticleRepository();

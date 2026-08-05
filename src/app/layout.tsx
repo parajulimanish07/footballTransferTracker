@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-theme="dark" data-font="space-grotesk">
+    <html lang="en" data-theme="dark" data-font="space-grotesk" suppressHydrationWarning>
       <body className="font-sans antialiased bg-bg text-text selection:bg-accent-emerald/30 selection:text-white transition-colors duration-200">
         <ThemeFontProvider>
           {children}

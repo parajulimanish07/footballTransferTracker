@@ -53,7 +53,7 @@ export const apiFootballProvider: NewsProvider = {
     url.searchParams.set('team', String(targetTeamId));
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 3500);
 
     try {
       const response = await fetch(url.toString(), {

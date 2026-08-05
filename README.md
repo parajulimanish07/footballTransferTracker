@@ -1,141 +1,112 @@
-# PitchPulse — AI-Powered Transfer Intelligence Platform
+# Football Transfer Intelligence Platform ⚽🤖
 
-PitchPulse is a production-grade, AI-powered football transfer intelligence application built with **Next.js 15 (App Router), TypeScript, Tailwind CSS**, and a **Python FastAPI Machine Learning Microservice**.
+A full-stack, real-time **AI-Powered Football Transfer Intelligence Platform** built with **Next.js 15 App Router**, **TypeScript**, **Python FastAPI ML**, **PostgreSQL / pgvector**, **Grounded Hybrid RAG**, and **Multi-Source Ingestion Orchestration**.
 
-The platform filters out noise, social media clickbait, unverified rumor mills, and duplicate reports by combining deterministic source-verification rules with supervised machine learning (TF-IDF + Logistic Regression / Linear SVM), Retrieval-Augmented Generation (RAG), and Explainable AI.
+The platform aggregates verified transfer reports from trusted newspapers, official club press releases, and insider social posts, filtering out unverified clickbait and categorizing rumours by transfer stage and reliability.
 
 ---
 
-## 🏛️ System Architecture
+## 🎯 Architecture Diagram
 
 ```mermaid
 graph TD
-    A[NewsAPI / Ingestion] --> B[Zod Schema Validation]
-    B --> C[Source Reliability & Tier Verification]
-    C --> D[Text Preprocessing & Entity Extraction]
-    D --> E[Python ML Service: TF-IDF Duplicate Detection]
-    E --> F[Python ML Service: Transfer Status Classifier]
-    F --> G[Confidence & Rule-Based Override Check]
-    G --> H[LLM Provider: Structured Extraction & RAG Assistant]
-    H --> I[Personalised Transfer Hub & Analytics UI]
+  A[BBC Sport RSS] --> F[Common Source Format: RawTransferSourceItem]
+  B[The Guardian API] --> F
+  C[Official Club Feeds] --> F
+  D[Official X API Whitelist] --> F
+  E[Manual Trusted Imports] --> F
 
-    subgraph Next.js App Router
-        B
-        C
-        D
-        G
-        H
-        I
-    end
-
-    subgraph Python FastAPI ML Service
-        E
-        F
-    end
+  F --> G[Source Registry Validation]
+  G --> H[Transfer Relevance Gate]
+  H --> I[Clause-Level Claim Extraction]
+  I --> J[Player & Club Entity Resolution]
+  J --> K[Provenance & Repost Grouping]
+  K --> L[Transfer Status & Evidence Level Classification]
+  L --> M[Reliability Scoring & Confidence Progression]
+  M --> N[Persistent Storage & Story Timeline]
+  N --> O[Embeddings & Grounded RAG Index]
+  O --> P[Public News Feed & Admin Monitoring]
 ```
 
 ---
 
-## 🧠 AI Processing Pipeline
+## 🚀 Key Technical Features
 
-1. **NewsAPI Ingestion:** Raw articles fetched server-side using secure environment variables.
-2. **Article Validation:** Validated using strict Zod schemas (`title`, `description`, `url`, `author`).
-3. **Trusted-Source Filtering:** Deterministic verification matching domains & journalists against approved tiers.
-4. **Text Preprocessing:** Lowercase normalization, URL removal, punctuation cleaning while preserving proper nouns (players & clubs).
-5. **Entity Extraction:** Identification of player names, current/destination clubs, and transfer keywords.
-6. **TF-IDF Duplicate Detection:** Cosine similarity comparison (`>= 0.82` duplicate, `0.68 - 0.82` related) with 24-hour time-window and player/club entity matching.
-7. **ML Transfer-Status Classification:** Supervised 9-class text classification (`OFFICIAL`, `AGREEMENT_REACHED`, `ADVANCED_TALKS`, `NEGOTIATIONS`, `BID_SUBMITTED`, `APPROACH_MADE`, `INTEREST`, `DEPARTURE_EXPECTED`, `NOT_TRANSFER_NEWS`).
-8. **Reliability Scoring:** Transparent formula: Source (40%), Journalist (30%), Cross-confirmation (20%), Recency (10%).
-9. **LLM Summary & RAG Assistant:** Low-temperature structured JSON extraction and grounded Q&A over verified reports.
-10. **Human Review Queue:** Articles with confidence `< 0.65` or missing attributes are flagged for human review at `/admin/review`.
+1. **Multi-Source Ingestion Engine (`src/lib/news/providers/`):**
+   - Clean `TransferSourceAdapter` abstraction unifying BBC RSS, The Guardian API, Official Club RSS feeds, official X API v2 search adapter, and manual imports.
+   - Circuit-breaker fault isolation using `Promise.allSettled` ensures single-source outages do not break the feed.
 
----
+2. **Domain & Author Verification Registry (`src/config/source-registry.ts`):**
+   - Registry mapping Tier 1 publishers (BBC, Guardian, Sky Sports), approved journalists (Fabrizio Romano, David Ornstein, Gianluca Di Marzio, Florian Plettenberg), and official club feeds with base reliability scores.
 
-## 🤖 Why Each AI Technique Was Selected
+3. **Sentence-Level Clause Isolation (`src/lib/news/resolve-transfer-entities.ts`):**
+   - Clause-boundary text parsing (`extractTransferClaims`) prevents cross-sentence entity contamination in multi-rumor roundup articles.
 
-* **TF-IDF Vectorization:** Captures domain-specific transfer n-grams (e.g. *"submitted opening bid"*, *"personal terms agreed"*) with minimal computational overhead.
-* **Logistic Regression vs. Linear SVM:** Supervised classifiers trained on TF-IDF features with balanced class weights to handle sparse multi-class transfer news. Evaluated using **Macro F1-score**.
-* **Cosine Similarity:** Provides deterministic, scale-invariant similarity scores between article term vectors.
-* **Retrieval-Augmented Generation (RAG):** Restricts LLM responses strictly to stored, retrieved evidence, eliminating hallucinated transfer claims.
-* **Deterministic Rule Overrides:** Hard-coded security rules ensure official club statements always take precedence over ML predictions.
+4. **Grounded Hybrid RAG Pipeline (`src/lib/rag/`):**
+   - Reranking engine combining **40% Semantic Similarity + 25% Keyword Match + 20% Source Reliability + 15% Recency**.
+   - Persistent article storage (`StoredTransferArticle`) with SHA-256 content hashing to avoid duplicate embedding calls. Strict prompt injection protection and Zod output validation (`GroundedTransferAnswer`).
 
----
+5. **Early Signal & Provenance System (`src/lib/news/confidence-progression.ts`):**
+   - Classifies reports into `official_confirmation`, `trusted_report`, `early_signal`, and `secondary_confirmation`.
+   - Tracks reposts/quote posts so repeated insider posts do not count as false independent confirmations.
 
-## 🔒 Security Configuration
+6. **Machine Learning Microservice (`ml-service/`):**
+   - Python FastAPI microservice using TF-IDF n-gram vectorization (`ngram_range=(1,2)`) and Logistic Regression / Linear SVM classifiers trained on transfer headline patterns.
 
-1. **`NEWS_API_KEY` Protection:** Stored in `.env.local` and accessed strictly in server-side Route Handlers.
-2. **Git Hygiene:** `.gitignore` excludes `.env.local`, `.next/`, `node_modules/`, `ml-service/venv/`, and `ml-service/models/*.joblib`.
-3. **Environment Documentation:** `.env.example` provides template variables without exposing production secrets.
-4. **Key Rotation Notice:** Any API key previously committed in un-ignored environments should be regenerated immediately.
+7. **Modern Minimal UI Layout:**
+   - 4 top-level items (`Home`, `Leagues`, `Following`, `More`), permanent dark mode, responsive mobile navigation, clean Trending Targets widget, and contextual entity highlight strips.
+
+8. **Admin Route Security Middleware (`src/middleware.ts`):**
+   - Protects `/admin/*` pages and `/api/admin/*` endpoints with session/passcode checks (`ADMIN_SECRET`).
 
 ---
 
-## 🚀 Getting Started & Local Setup
+## 🛠️ Technology Stack
 
-### Prerequisites
+- **Frontend & App Framework:** Next.js 15 App Router, React 19, TypeScript, Tailwind CSS, Lucide Icons.
+- **Backend & Vector Database:** PostgreSQL, `pgvector`, Next.js Server Handlers, In-Memory Repository.
+- **Machine Learning & RAG:** OpenAI (`gpt-4o-mini`, `text-embedding-3-small`), Python 3.11, FastAPI, scikit-learn, TF-IDF, Linear SVM.
+- **Testing:** Vitest (93 passing unit tests across 13 test suites).
 
-- Node.js 18+ and npm / yarn
-- Python 3.9+ (optional for running Python FastAPI service natively)
+---
 
-### 1. Environment Setup
+## 💻 Local Development Setup
 
-Copy `.env.example` to `.env.local`:
-
+### 1. Clone the repository
 ```bash
-cp .env.example .env.local
+git clone https://github.com/your-username/footballTransferTracker.git
+cd footballTransferTracker
 ```
 
-Fill in your `NEWS_API_KEY`.
-
-### 2. Running Next.js Application
-
+### 2. Install dependencies
 ```bash
 npm install
-npm run dev
 ```
 
-Open `http://localhost:3000` to view the application.
-
-### 3. Running Python ML Service (`ml-service/`)
-
-```bash
-cd ml-service
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python training/train_transfer_classifier.py
-uvicorn app.main:app --reload --port 8000
+### 3. Configure environment variables
+Copy `.env.example` to `.env.local`:
+```env
+NEWS_PROVIDERS=bbc-rss,guardian,official-club,manual
+GUARDIAN_API_KEY=
+LLM_PROVIDER=openai
+OPENAI_API_KEY=
+EMBEDDING_PROVIDER=mock
+ADMIN_SECRET=transfer-admin-secret-2026
 ```
 
----
-
-## 🧪 Testing
-
-### Running Next.js Vitest Suite
-
+### 4. Run automated test suite
 ```bash
 npm test
 ```
 
-### Running TypeScript Check
-
+### 5. Start development server
 ```bash
-npx tsc --noEmit
+npm run dev
 ```
-
-### Running Python Pytest Suite
-
-```bash
-cd ml-service
-pytest tests/
-```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 📊 Application Routes
+## 🛡️ License
 
-- **`/dashboard`**: Personalised transfer hub with club switcher, filters, and RAG Assistant.
-- **`/sources`**: Public Source Reliability Directory with transparent scoring formula.
-- **`/analytics`**: Real-time AI telemetry, status distribution charts, and ML confidence spread.
-- **`/admin/labelling`**: Protected dataset labelling workbench with keyboard shortcuts & CSV export.
-- **`/admin/review`**: Human-in-the-loop review queue for low-confidence predictions and duplicate merging.
+This project is licensed under the MIT License.

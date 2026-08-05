@@ -1,6 +1,46 @@
 import type { ClubSummary } from './club';
 import type { ReliabilityLevel, TrustedSource, Journalist } from './source';
 
+export type FeedMode = 'global' | 'club';
+
+export interface FeedContext {
+  mode: FeedMode;
+  selectedClubId: string | null;
+}
+
+export type FeedPreference =
+  | {
+      mode: 'global';
+      clubIds: [];
+    }
+  | {
+      mode: 'clubs';
+      clubIds: string[];
+    };
+
+export interface UserFeedSettings {
+  defaultMode: FeedMode;
+  defaultClubId: string | null;
+  followedClubIds: string[];
+}
+
+export type EvidenceLevel =
+  | 'official_confirmation'
+  | 'trusted_report'
+  | 'early_signal'
+  | 'secondary_confirmation';
+
+export interface SourceProvenance {
+  originalReporterId: string | null;
+  originalPostId: string | null;
+  originalArticleUrl: string | null;
+  discoveredThroughProvider: string;
+  isOriginalReport: boolean;
+  isRepost: boolean;
+  isQuotePost: boolean;
+  isSecondaryReport: boolean;
+}
+
 export type TransferStatus =
   | 'official'
   | 'agreement_reached'
@@ -9,7 +49,8 @@ export type TransferStatus =
   | 'bid_submitted'
   | 'approach_made'
   | 'interest'
-  | 'departure_expected';
+  | 'departure_expected'
+  | 'not_transfer_news';
 
 export type TransferDirection = 'incoming' | 'outgoing' | 'related' | null;
 
@@ -52,6 +93,8 @@ export interface TransferNewsItem {
   journalistName: string | null;
   reliability: ReliabilityLevel;
   transferStatus: TransferStatus;
+  evidenceLevel?: EvidenceLevel;
+  provenance?: SourceProvenance;
   publishedAt: string;
   updatedAt: string;
   imageUrl: string | null;
@@ -79,7 +122,10 @@ export interface NewsApiResponse {
 }
 
 export interface FilterState {
+  mode?: FeedMode;
   club?: string | null;
+  clubs?: string[] | null;
+  league?: string | null;
   reliability?: ReliabilityLevel | null;
   status?: TransferStatus | null;
   direction?: Exclude<TransferDirection, null> | null;

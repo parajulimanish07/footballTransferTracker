@@ -7,7 +7,7 @@ export const bbcRssProvider: NewsProvider = {
   async getTransferNews(options: TransferNewsQuery): Promise<RawNewsArticle[]> {
     const feedUrl = 'http://feeds.bbci.co.uk/sport/football/rss.xml';
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 3000);
 
     try {
       const response = await fetch(feedUrl, {

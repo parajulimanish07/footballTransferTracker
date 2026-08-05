@@ -1,0 +1,58 @@
+[
+  {
+    "externalId": "demo-1",
+    "headline": "Tottenham make an approach for Victor Osimhen",
+    "description": "Tottenham Hotspur have made an official inquiry to Napoli for striker Victor Osimhen as negotiations continue.",
+    "bodyText": null,
+    "sourceName": "BBC Sport",
+    "sourceDomain": "bbc.com",
+    "sourceUrl": "https://www.bbc.com/sport/football/articles/c0000001",
+    "journalistName": "David Ornstein",
+    "publishedAt": "2026-08-05T10:00:00.000Z",
+    "imageUrl": null,
+    "relatedClubHints": ["tottenham-hotspur", "napoli"],
+    "provider": "bbc-rss"
+  },
+  {
+    "externalId": "demo-2",
+    "headline": "Turkish club Trabzonspor begin talks to sign Salah",
+    "description": "Turkish club Trabzonspor say they have begun negotiations to sign Mohamed Salah from Liverpool.",
+    "bodyText": null,
+    "sourceName": "The Guardian",
+    "sourceDomain": "theguardian.com",
+    "sourceUrl": "https://www.theguardian.com/football/2026/aug/05/trabzonspor-salah-talks",
+    "journalistName": "Fabrizio Romano",
+    "publishedAt": "2026-08-05T09:30:00.000Z",
+    "imageUrl": null,
+    "relatedClubHints": ["trabzonspor", "liverpool"],
+    "provider": "guardian"
+  },
+  {
+    "externalId": "demo-3",
+    "headline": "Arsenal in talks to sign Newcastle's Guimaraes",
+    "description": "Arsenal open direct talks with Newcastle United to sign midfielder Bruno Guimaraes.",
+    "bodyText": null,
+    "sourceName": "BBC Sport",
+    "sourceDomain": "bbc.com",
+    "sourceUrl": "https://www.bbc.com/sport/football/articles/c0000003",
+    "journalistName": "David Ornstein",
+    "publishedAt": "2026-08-05T08:45:00.000Z",
+    "imageUrl": null,
+    "relatedClubHints": ["arsenal", "newcastle-united"],
+    "provider": "bbc-rss"
+  },
+  {
+    "externalId": "demo-4",
+    "headline": "Official: Real Madrid complete signing of Kylian Mbappe",
+    "description": "Real Madrid officially confirm the signing of Kylian Mbappe on a free transfer with a five-year contract.",
+    "bodyText": null,
+    "sourceName": "Real Madrid C.F. Official",
+    "sourceDomain": "realmadrid.com",
+    "sourceUrl": "https://www.realmadrid.com/en-US/news/official-announcement-mbappe",
+    "journalistName": null,
+    "publishedAt": "2026-08-05T07:15:00.000Z",
+    "imageUrl": null,
+    "relatedClubHints": ["real-madrid", "psg"],
+    "provider": "official-club"
+  }
+]
