@@ -8,6 +8,7 @@ import { formatDistanceToNowStrict } from 'date-fns';
 import { ReliabilityBadge } from '@/components/reliability/reliability-badge';
 import { TransferStatusBadge } from '@/components/transfer/transfer-status-badge';
 import { TransferDirectionBadge } from '@/components/transfer/transfer-direction-badge';
+import { ClubLogo } from '@/components/clubs/club-logo';
 import type { TransferNewsItem } from '@/types/news';
 
 // Dynamically load ExplainableAIModal ONLY when Details is clicked
@@ -65,6 +66,11 @@ export function TransferNewsCard({
           <div className="flex flex-wrap items-center gap-1.5">
             <ReliabilityBadge level={item.reliability} />
             <TransferStatusBadge status={item.transferStatus} />
+            {item.demo && (
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+                Offline Snapshot
+              </span>
+            )}
             {directionBadge ? <TransferDirectionBadge direction={directionBadge} /> : null}
           </div>
 
@@ -98,21 +104,34 @@ export function TransferNewsCard({
         {/* Short Summary */}
         <p className="mt-2 line-clamp-2 text-xs sm:text-sm leading-relaxed text-slate-300">{item.summary}</p>
 
-        {/* Player & Linked Club Strip */}
-        {isTransfer && (item.playerName || movementText) ? (
-          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-slate-800/80 bg-slate-950/60 px-3 py-2 text-xs">
+        {/* Player & Linked Club Strip with Real Club Logos */}
+        {isTransfer && (item.playerName || item.currentClub || item.destinationClub) ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2.5 rounded-lg border border-slate-800/80 bg-slate-950/60 px-3 py-2 text-xs">
             {item.playerName && (
               <div className="flex items-center gap-1.5 font-bold text-white">
                 <User className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
                 <span>{item.playerName}</span>
               </div>
             )}
-            {item.playerName && (movementText || item.transferStatus) && <span className="text-slate-700 font-bold">•</span>}
-            <div className="flex items-center gap-1.5 font-medium text-slate-300">
-              {movementText ? (
-                <span className="text-emerald-400 font-semibold">{movementText}</span>
-              ) : (
-                <span className="text-slate-400 font-medium italic">Transfer Target Reported</span>
+            {item.playerName && (item.currentClub || item.destinationClub) && <span className="text-slate-700 font-bold">•</span>}
+            <div className="flex flex-wrap items-center gap-2 font-medium text-slate-300">
+              {item.currentClub && (
+                <div className="flex items-center gap-1.5">
+                  <ClubLogo clubId={item.currentClub.id} size="xs" />
+                  <span className="text-slate-300 font-semibold">{item.currentClub.name}</span>
+                </div>
+              )}
+              {item.currentClub && item.destinationClub && (
+                <span className="text-emerald-400 font-bold">➔</span>
+              )}
+              {item.destinationClub && (
+                <div className="flex items-center gap-1.5">
+                  <ClubLogo clubId={item.destinationClub.id} size="xs" />
+                  <span className="text-emerald-400 font-bold">{item.destinationClub.name}</span>
+                </div>
+              )}
+              {!item.currentClub && !item.destinationClub && (
+                <span className="text-slate-400 italic">Transfer Target Reported</span>
               )}
             </div>
           </div>

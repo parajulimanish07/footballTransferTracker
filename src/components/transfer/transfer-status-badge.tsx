@@ -12,7 +12,8 @@ export function TransferStatusBadge({ status, className }: { status: TransferSta
     approach_made: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
     interest: 'bg-slate-500/15 text-slate-300 border-slate-500/30',
     departure_expected: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
-  }[status];
+    not_transfer_news: 'bg-slate-700/20 text-slate-400 border-slate-700/40',
+  }[status] || 'bg-slate-500/15 text-slate-300 border-slate-500/30';
 
   const dotColor = {
     official: 'bg-emerald-400',
@@ -23,7 +24,8 @@ export function TransferStatusBadge({ status, className }: { status: TransferSta
     approach_made: 'bg-amber-400',
     interest: 'bg-slate-400',
     departure_expected: 'bg-rose-400',
-  }[status];
+    not_transfer_news: 'bg-slate-500',
+  }[status] || 'bg-slate-400';
 
   return (
     <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold tracking-wide', tone, className)}>

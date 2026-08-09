@@ -3,6 +3,9 @@ import type { ClubSummary } from '@/types/club';
 import { classifyTransferStatus } from './classify-transfer-status';
 import type { TransferStatus } from '@/types/news';
 
+import type { EntitySource } from '@/lib/entities/entity-types';
+import { footballEntityRepository } from '@/lib/entities/entity-repository';
+
 export interface TransferClaim {
   claimText: string;
   playerName: string | null;
@@ -11,6 +14,7 @@ export interface TransferClaim {
   interestedClubId: string | null;
   transferStatus: TransferStatus | null;
   confidence: number;
+  entitySource?: EntitySource;
 }
 
 export interface ResolvedEntities {
@@ -21,6 +25,7 @@ export interface ResolvedEntities {
   isRoundup: boolean;
   confidence: 'high' | 'medium' | 'low';
   claims: TransferClaim[];
+  entitySource?: EntitySource;
 }
 
 const KNOWN_PLAYERS = [
@@ -65,11 +70,25 @@ const KNOWN_PLAYERS = [
   'Mikel Merino',
   'Alexander Isak',
   'Bruno Guimaraes',
+  'Guimaraes',
+  'Cristian Romero',
+  'Romero',
+  'James Trafford',
+  'Trafford',
+  'Vinicius Jr',
+  'Vinícius Júnior',
+  'Vinicius',
+  'Djed Spence',
+  'Mariona Caldentey',
 ];
 
 const KNOWN_PLAYER_ORIGIN_CLUBS: Record<string, string> = {
   'mohamed salah': 'liverpool',
   'bruno guimaraes': 'newcastle-united',
+  'guimaraes': 'newcastle-united',
+  'pedro neto': 'chelsea',
+  'cristian romero': 'tottenham-hotspur',
+  'romero': 'tottenham-hotspur',
   'victor osimhen': 'napoli',
   'jack grealish': 'manchester-city',
   'cody gakpo': 'liverpool',
@@ -95,6 +114,13 @@ const KNOWN_PLAYER_ORIGIN_CLUBS: Record<string, string> = {
   'aaron ramsdale': 'southampton',
   'marc guehi': 'crystal-palace',
   'mikel merino': 'arsenal',
+  'james trafford': 'manchester-city',
+  'trafford': 'manchester-city',
+  'vinicius jr': 'real-madrid',
+  'vinícius júnior': 'real-madrid',
+  'vinicius': 'real-madrid',
+  'djed spence': 'tottenham-hotspur',
+  'mariona caldentey': 'arsenal',
 };
 
 const STOP_WORDS_TRAILING = new Set([
@@ -138,7 +164,7 @@ export function extractTransferClaims(headline: string, summary: string): Transf
 
   for (const clauseText of rawClauses) {
     const player = extractPlayerNameFromText(clauseText);
-    const originClubId = extractOriginClubIdFromText(clauseText, player);
+    const { originClubId, entitySource } = extractOriginClubIdFromText(clauseText, player);
     const destClubId = extractDestinationClubIdFromText(clauseText, originClubId);
 
     // If no explicit transfer player or club evidence in this clause, skip it
@@ -161,6 +187,7 @@ export function extractTransferClaims(headline: string, summary: string): Transf
       interestedClubId: destClubId,
       transferStatus: status,
       confidence,
+      entitySource,
     });
   }
 
@@ -179,6 +206,7 @@ export function extractTransferClaims(headline: string, summary: string): Transf
       if (!existing.destinationClubId && claim.destinationClubId) existing.destinationClubId = claim.destinationClubId;
       if (!existing.interestedClubId && claim.interestedClubId) existing.interestedClubId = claim.interestedClubId;
       existing.confidence = Math.max(existing.confidence, claim.confidence);
+      if (claim.entitySource && claim.entitySource !== 'unknown') existing.entitySource = claim.entitySource;
     } else {
       mergedClaims.push(claim);
     }
@@ -215,7 +243,7 @@ export function resolveTransferEntities(
     selectedClaim = claims[0];
   }
 
-  let primaryPlayer = selectedClaim?.playerName || extractPlayerNameFromText(`${headline} ${summary}`);
+  const primaryPlayer = selectedClaim?.playerName || extractPlayerNameFromText(`${headline} ${summary}`);
   let currentClubSummary: ClubSummary | null = null;
   let destinationClubSummary: ClubSummary | null = null;
 
@@ -261,11 +289,12 @@ export function resolveTransferEntities(
     isRoundup,
     confidence,
     claims,
+    entitySource: selectedClaim?.entitySource || 'unknown',
   };
 }
 
 function extractPlayerNameFromText(text: string): string | null {
-  let matched = KNOWN_PLAYERS.find((p) => text.toLowerCase().includes(p.toLowerCase()));
+  const matched = KNOWN_PLAYERS.find((p) => text.toLowerCase().includes(p.toLowerCase()));
   if (matched) return cleanPlayerName(matched);
 
   const roleRegex = /(?:striker|winger|midfielder|defender|forward|star|player|target)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/i;
@@ -277,27 +306,58 @@ function extractPlayerNameFromText(text: string): string | null {
   return null;
 }
 
-function extractOriginClubIdFromText(text: string, playerName: string | null): string | null {
+function extractOriginClubIdFromText(
+  text: string,
+  playerName: string | null
+): { originClubId: string | null; entitySource: EntitySource } {
   let foundId: string | null = null;
+  let entitySource: EntitySource = 'unknown';
 
+  // 1a. Explicit direct player role evidence (e.g. Chelsea winger Pedro Neto)
+  if (playerName) {
+    for (const { clubId, alias } of SORTED_CLUB_ALIASES) {
+      const playerRolePattern = `\\b${escapeRegExp(alias)}('s|\\s+(striker|winger|midfielder|defender|forward|player|star|captain|goalkeeper))\\s+(?:[a-z]+\\s+)*${escapeRegExp(playerName)}`;
+      if (new RegExp(playerRolePattern, 'i').test(text)) {
+        return { originClubId: clubId, entitySource: 'article' };
+      }
+    }
+  }
+
+  // 1b. General origin evidence (from-pattern, management roles)
   for (const { clubId, alias } of SORTED_CLUB_ALIASES) {
     if (foundId) break;
 
     const possessivePattern = playerName
-      ? `\\b${escapeRegExp(alias)}('s|\\s+(striker|winger|midfielder|defender|forward|player|star|captain))\\s+(?:[a-z]+\\s+)*${escapeRegExp(playerName)}`
-      : `\\b${escapeRegExp(alias)}('s|\\s+(striker|winger|midfielder|defender|forward|player|star|captain))`;
+      ? `\\b${escapeRegExp(alias)}('s|\\s+(striker|winger|midfielder|defender|forward|player|star|captain|chief|boss|manager|sporting director|director|head coach|executive|chairman|president))\\s+(?:[a-z]+\\s+)*${escapeRegExp(playerName)}`
+      : `\\b${escapeRegExp(alias)}('s|\\s+(striker|winger|midfielder|defender|forward|player|star|captain|chief|boss|manager|sporting director|director|head coach|executive|chairman|president))`;
 
     const possessiveRegex = new RegExp(possessivePattern, 'i');
-    if (possessiveRegex.test(text) || (playerName && text.toLowerCase().includes(`${alias.toLowerCase()}'s ${playerName.toLowerCase()}`))) {
+    const fromPattern = new RegExp(`\\bfrom\\s+(?:the\\s+)?${escapeRegExp(alias)}\\b`, 'i');
+    if (possessiveRegex.test(text) || fromPattern.test(text) || (playerName && text.toLowerCase().includes(`${alias.toLowerCase()}'s ${playerName.toLowerCase()}`))) {
       foundId = clubId;
+      entitySource = 'article';
     }
   }
 
+  // 2. Local player catalogue currentClubId
   if (!foundId && playerName) {
-    foundId = KNOWN_PLAYER_ORIGIN_CLUBS[playerName.toLowerCase()] || null;
+    const canonicalPlayer = footballEntityRepository.findPlayerByExactOrAliasSync(playerName);
+    if (canonicalPlayer?.currentClubId) {
+      foundId = canonicalPlayer.currentClubId;
+      entitySource = 'catalogue';
+    }
   }
 
-  return foundId;
+  // 3. Legacy static fallback
+  if (!foundId && playerName) {
+    const legacyClub = KNOWN_PLAYER_ORIGIN_CLUBS[playerName.toLowerCase()];
+    if (legacyClub) {
+      foundId = legacyClub;
+      entitySource = 'legacy_fallback';
+    }
+  }
+
+  return { originClubId: foundId, entitySource };
 }
 
 function extractDestinationClubIdFromText(text: string, originClubId: string | null): string | null {
@@ -306,12 +366,24 @@ function extractDestinationClubIdFromText(text: string, originClubId: string | n
   for (const { clubId, alias } of SORTED_CLUB_ALIASES) {
     if (foundId || (originClubId && clubId === originClubId)) continue;
 
-    const destPattern1 = `\\b${escapeRegExp(alias)}(?:\\s+[a-z"']+)*\\s+(keen|confident|agree|bidding|bid|chasing|seek|target|want|wants|monitoring|sign|signing|move for|close to|linked|interested|proposal|work with|consider a move|talks with|make an approach)`;
-    const destPattern2 = `(move to|close to|linked with|sign for|join|switch to|target for|move for|keen on|work with|approach for|approach to|interested in|proposal to|target|talks with|consider a move for|make an approach for)\\s+(?:[a-z"']+\\s+)*${escapeRegExp(alias)}`;
+    const destPattern1 = `\\b${escapeRegExp(alias)}(?:\\s+[a-z"']+)*\\s+(keen|confident|agree|bidding|bid|chasing|seek|target|want|wants|monitoring|sign|signing|move for|close to|linked|interested|proposal|work with|consider a move|talks with|make an approach|join|joins|joining|chosen|chose)`;
+    const destPattern2 = `(move to|close to|linked with|sign for|join|joins|joining|switch to|target for|move for|keen on|work with|approach for|approach to|interested in|proposal to|target|talks with|consider a move for|make an approach for|chosen|chose|choose|chooses|fit at|good fit at|fit for|deal to|heading to|heads to|pursue|pursuing|pursuit of|bid from|offer from|interest from|eyeing|eyes|favoring|favours|interest of|wanted|wanted a|wanted move|wanted a move|wanted a move to|wanted to join)\\s+(?:[a-z"']+\\s+)*${escapeRegExp(alias)}`;
     const destinationRegex = new RegExp(`(${destPattern1}|${destPattern2})`, 'i');
 
     if (destinationRegex.test(text.toLowerCase())) {
       foundId = clubId;
+    }
+  }
+
+  // Fallback: If originClubId is known, any second distinct club appearing in text is the target/destination club
+  if (!foundId && originClubId) {
+    for (const { clubId, alias } of SORTED_CLUB_ALIASES) {
+      if (clubId === originClubId) continue;
+      const wordBoundaryRegex = new RegExp(`\\b${escapeRegExp(alias)}\\b`, 'i');
+      if (wordBoundaryRegex.test(text)) {
+        foundId = clubId;
+        break;
+      }
     }
   }
 

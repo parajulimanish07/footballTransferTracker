@@ -6,8 +6,8 @@ import { ReliabilityBadge } from '@/components/reliability/reliability-badge';
 import { TransferStatusBadge } from '@/components/transfer/transfer-status-badge';
 import { TransferDirectionBadge } from '@/components/transfer/transfer-direction-badge';
 
-export default async function NewsDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const item = await getNewsItemById(id);
   if (!item) notFound();
 

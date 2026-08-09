@@ -57,7 +57,7 @@ export function parseTransferSearchIntent(question: string): TransferSearchInten
     }
   }
 
-  // 3. Identify Club IDs
+  // 3. Identify Club IDs with Entity Repository & Aliases
   const clubIds: string[] = [];
   clubs.forEach((club) => {
     if (
@@ -67,6 +67,17 @@ export function parseTransferSearchIntent(question: string): TransferSearchInten
       if (!clubIds.includes(club.id)) clubIds.push(club.id);
     }
   });
+
+  // Dynamic alias lookup (e.g., "Spurs" -> "tottenham-hotspur")
+  const tokens = q.split(/\s+/);
+  for (const token of tokens) {
+    if (token.length > 2) {
+      const matched = clubs.find((c) => c.aliases.some((a) => a.toLowerCase() === token));
+      if (matched && !clubIds.includes(matched.id)) {
+        clubIds.push(matched.id);
+      }
+    }
+  }
 
   // 4. Identify League IDs
   const leagueIds: string[] = [];

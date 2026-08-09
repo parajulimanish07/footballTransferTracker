@@ -8,6 +8,7 @@ import { xTwitterProvider } from './x-twitter-provider';
 import { apiFootballProvider } from './api-football-provider';
 import { newsApiProvider } from './news-api-provider';
 import { mockNewsProvider } from './mock-provider';
+import demoArticlesData from '@/data/demo-articles.json';
 
 import { isTrustedSource } from '../filter-trusted-sources';
 import { scoreReliability, reliabilityRank } from '../score-reliability';
@@ -124,10 +125,9 @@ export const multiProvider = {
 
     // Fallback to controlled demo snapshot dataset if zero live articles returned
     if (!rawArticles.length) {
-      try {
-        const demoData = require('@/data/demo-articles.json');
-        rawArticles.push(...demoData);
-      } catch {
+      if (Array.isArray(demoArticlesData) && demoArticlesData.length > 0) {
+        rawArticles.push(...(demoArticlesData as any));
+      } else {
         const mockRaw = await mockNewsProvider.getTransferNews(query);
         rawArticles.push(...mockRaw);
       }
@@ -202,8 +202,9 @@ export const multiProvider = {
       })
     );
 
-    // 5. TF-IDF Duplicate Detection & Primary Story Selection
-    const groupedItems = selectPrimaryStoriesAndGroupDuplicates(processedItems);
+    // 5. Filter out non-transfer news & run TF-IDF Duplicate Detection
+    const validTransferItems = processedItems.filter((item) => item.transferStatus !== 'not_transfer_news');
+    const groupedItems = selectPrimaryStoriesAndGroupDuplicates(validTransferItems);
 
     const response: MultiProviderResponse = {
       data: groupedItems,

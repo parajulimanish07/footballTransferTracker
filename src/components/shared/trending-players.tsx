@@ -2,6 +2,7 @@
 
 import { Flame, User } from 'lucide-react';
 import { TransferStatusBadge } from '@/components/transfer/transfer-status-badge';
+import { ClubLogo } from '@/components/clubs/club-logo';
 import type { TransferStatus } from '@/types/news';
 
 export function TrendingPlayers({ players }: { players: Array<{ id: string; name: string; club: string; status: string }> }) {
@@ -22,9 +23,7 @@ export function TrendingPlayers({ players }: { players: Array<{ id: string; name
               className="group rounded-lg border border-slate-800/80 bg-slate-950/60 p-3 transition-colors hover:border-slate-700 hover:bg-slate-950"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-800 border border-slate-700 text-cyan-400 font-bold text-xs">
-                  <User className="h-4 w-4" />
-                </div>
+                <ClubLogo clubId={player.id} size="sm" />
                 <div className="min-w-0 flex-1">
                   <h4 className="font-bold text-xs sm:text-sm text-white leading-tight truncate group-hover:text-cyan-300 transition-colors">
                     {player.name}

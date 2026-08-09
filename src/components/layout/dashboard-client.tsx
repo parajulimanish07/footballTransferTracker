@@ -12,6 +12,7 @@ import { NewsCardSkeleton } from '@/components/news/news-card-skeleton';
 import { TrendingPlayers } from '@/components/shared/trending-players';
 import { LastUpdatedIndicator } from '@/components/shared/last-updated-indicator';
 import { TransferSummary } from '@/components/shared/transfer-summary';
+import { ClubLogo } from '@/components/clubs/club-logo';
 import type { NewsApiResponse, TransferNewsItem, FeedMode } from '@/types/news';
 
 // In-Memory Client Feed Cache for Instant Tab/Club Switching (<50ms)
@@ -293,6 +294,7 @@ export function DashboardClient() {
                     : 'border border-slate-800 bg-slate-950/60 text-slate-400 hover:text-text hover:bg-slate-800'
                 }`}
               >
+                <ClubLogo clubId={club.id} size="xs" />
                 <span>{club.name}</span>
               </button>
             );
@@ -317,7 +319,11 @@ export function DashboardClient() {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-cyan-400">
-                  <ShieldCheck className="h-4 w-4" />
+                  {currentClub ? (
+                    <ClubLogo clubId={currentClub.id} size="xs" />
+                  ) : (
+                    <ShieldCheck className="h-4 w-4" />
+                  )}
                   <span>{mode === 'global' ? 'All Clubs' : currentClub?.league || 'Premier League'}</span>
                 </div>
                 <h1 className="mt-2 font-display text-2xl font-extrabold text-text sm:text-3xl">

@@ -6,7 +6,7 @@ This document details **what is working perfectly right now** in the codebase an
 
 ## 🟢 1. What is Working Perfectly Right Now
 
-The codebase is fully built, cleanly typed in TypeScript (Next.js 15 App Router), and verified by **88 passing automated unit tests** across 12 test suites.
+The codebase is fully built, cleanly typed in TypeScript (Next.js 15 App Router), and verified by **121 passing automated unit tests** across 16 test suites.
 
 ### 1.1 Ingestion & Source Adapters (`src/lib/news/providers/`)
 - ✅ **Common Source Adapter Interface (`source-adapter.ts`):** `TransferSourceAdapter`, `TransferSourceQuery`, and `RawTransferSourceItem` unify all raw data formats into a single pipeline.

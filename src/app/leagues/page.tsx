@@ -3,6 +3,7 @@ import { ArrowLeft, Trophy, ChevronRight, ShieldCheck } from 'lucide-react';
 import { AppHeader } from '@/components/layout/app-header';
 import { MobileNavigation } from '@/components/layout/mobile-navigation';
 import { leagues, getClubsForLeague } from '@/config/leagues';
+import { ClubLogo } from '@/components/clubs/club-logo';
 
 export default function LeaguesDirectoryPage() {
   return (
@@ -56,10 +57,10 @@ export default function LeaguesDirectoryPage() {
                     <Link
                       key={club.id}
                       href={`/club/${club.slug}`}
-                      className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-xs font-medium text-slate-200 hover:border-slate-700 hover:text-white transition-colors"
+                      className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-xs font-medium text-slate-200 hover:border-slate-700 hover:text-white transition-colors min-w-0"
                     >
-                      <span className="truncate">{club.name}</span>
-                      <ShieldCheck className="h-3 w-3 text-slate-500 shrink-0" />
+                      <ClubLogo clubId={club.id} size="xs" />
+                      <span className="truncate flex-1">{club.name}</span>
                     </Link>
                   ))}
                 </div>

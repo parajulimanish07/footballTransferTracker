@@ -103,4 +103,44 @@ describe('Strict Transfer Entity Resolution & Pipeline Validation', () => {
     expect(resolved.playerName).toBe('Victor Osimhen');
     expect(resolved.destinationClub?.name).toBe('Real Madrid');
   });
+
+  it('correctly resolves Mohamed Salah to Trabzonspor and Gakpo to Spurs transfer movements', () => {
+    const headline1 = 'Why has Mohamed Salah chosen Trabzonspor?';
+    const summary1 = 'Why Mohamed Salah chose Trabzonspor over Saudi Arabia and MLS, and what the move means for him and Turkish football.';
+
+    const resolved1 = resolveTransferEntities(headline1, summary1);
+    expect(resolved1.playerName).toBe('Mohamed Salah');
+    expect(resolved1.currentClub?.name).toBe('Liverpool');
+    expect(resolved1.destinationClub?.name).toBe('Trabzonspor');
+
+    const headline2 = "A wanted man - but would Liverpool's Gakpo be a good fit at Spurs?";
+    const summary2 = "The data behind Tottenham's interest in Liverpool forward Cody Gakpo and how he could fit into Roberto de Zerbi’s side.";
+
+    const resolved2 = resolveTransferEntities(headline2, summary2);
+    expect(resolved2.playerName).toBe('Cody Gakpo');
+    expect(resolved2.currentClub?.name).toBe('Liverpool');
+    expect(resolved2.destinationClub?.name).toBe('Tottenham Hotspur');
+  });
+
+  it('correctly resolves Trafford transfer from Man City to Leeds United and Vinicius contract renewal', () => {
+    const headline = 'Trafford joins Leeds from Man City in potential £45m deal';
+    const summary = 'Leeds United sign Manchester City and England goalkeeper James Trafford in a deal worth up to £45m.';
+
+    const resolved = resolveTransferEntities(headline, summary);
+    expect(resolved.playerName).toBe('Trafford');
+    expect(resolved.currentClub?.name).toBe('Manchester City');
+    expect(resolved.destinationClub?.name).toBe('Leeds United');
+
+    const viniHeadline = 'Vinicius Jr and Real Madrid agree new six-year deal';
+    const viniSummary = 'Brazil winger Vinicius Jr will stay at Real Madrid after agreeing improved terms with the Spanish side despite interest from Arsenal.';
+    const status = classifyTransferStatus(viniHeadline, viniSummary, false);
+    expect(status).toBe('official');
+
+    const guimaraesHeadline = 'Emotional Guimaraes wanted Arsenal move, says Newcastle chief';
+    const guimaraesSummary = 'Newcastle United sporting director Ross Wilson says the club did not plan to sell Bruno Guimaraes, but their very emotional captain wanted to join Arsenal.';
+    const guimaraesResolved = resolveTransferEntities(guimaraesHeadline, guimaraesSummary);
+    expect(guimaraesResolved.playerName).toContain('Guimaraes');
+    expect(guimaraesResolved.currentClub?.name).toBe('Newcastle United');
+    expect(guimaraesResolved.destinationClub?.name).toBe('Arsenal');
+  });
 });

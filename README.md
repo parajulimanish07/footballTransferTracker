@@ -1,8 +1,8 @@
 # Football Transfer Intelligence Platform ⚽🤖
 
-A full-stack, real-time **AI-Powered Football Transfer Intelligence Platform** built with **Next.js 15 App Router**, **TypeScript**, **Python FastAPI ML**, **PostgreSQL / pgvector**, **Grounded Hybrid RAG**, and **Multi-Source Ingestion Orchestration**.
+A portfolio-ready AI-powered football transfer intelligence platform built with **Next.js 15 App Router**, **React 19**, **TypeScript**, **Tailwind CSS**, **Python FastAPI ML**, **Grounded Hybrid RAG**, **Dynamic Football Entity Catalogue**, and **Multi-Source Ingestion Orchestration**.
 
-The platform aggregates verified transfer reports from trusted newspapers, official club press releases, and insider social posts, filtering out unverified clickbait and categorizing rumours by transfer stage and reliability.
+The platform aggregates verified transfer reports from trusted newspapers, official club press releases, and insider social posts, filtering out unverified clickbait and categorizing rumours by transfer stage, entity confidence, and source reliability.
 
 ---
 
@@ -16,16 +16,16 @@ graph TD
   D[Official X API Whitelist] --> F
   E[Manual Trusted Imports] --> F
 
-  F --> G[Source Registry Validation]
-  G --> H[Transfer Relevance Gate]
+  F --> G[Source Registry & Reliability Scoring]
+  G --> H[Transfer Relevance & Non-Transfer Gate]
   H --> I[Clause-Level Claim Extraction]
-  I --> J[Player & Club Entity Resolution]
+  I --> J[5-Tier Entity Resolution & Entity Catalogue]
   J --> K[Provenance & Repost Grouping]
-  K --> L[Transfer Status & Evidence Level Classification]
+  K --> L[Transfer Status & Agreement Classifier]
   L --> M[Reliability Scoring & Confidence Progression]
-  M --> N[Persistent Storage & Story Timeline]
-  N --> O[Embeddings & Grounded RAG Index]
-  O --> P[Public News Feed & Admin Monitoring]
+  M --> N[Persistent Local Entity & Article Repository]
+  N --> O[Embeddings & Grounded Hybrid RAG Index]
+  O --> P[Public Transfer Feed, RAG Assistant & Admin Dashboard]
 ```
 
 ---
@@ -33,40 +33,42 @@ graph TD
 ## 🚀 Key Technical Features
 
 1. **Multi-Source Ingestion Engine (`src/lib/news/providers/`):**
-   - Clean `TransferSourceAdapter` abstraction unifying BBC RSS, The Guardian API, Official Club RSS feeds, official X API v2 search adapter, and manual imports.
-   - Circuit-breaker fault isolation using `Promise.allSettled` ensures single-source outages do not break the feed.
+   - Unified `TransferSourceAdapter` abstraction connecting BBC RSS, The Guardian API, Official Club RSS feeds, official X API v2 adapter, and manual imports.
+   - Circuit-breaker fault isolation using `Promise.allSettled` ensures single-source outages do not crash the feed.
 
-2. **Domain & Author Verification Registry (`src/config/source-registry.ts`):**
-   - Registry mapping Tier 1 publishers (BBC, Guardian, Sky Sports), approved journalists (Fabrizio Romano, David Ornstein, Gianluca Di Marzio, Florian Plettenberg), and official club feeds with base reliability scores.
+2. **Dynamic Football Entity Catalogue (`src/lib/entities/`):**
+   - Local cached entity repository (`.data/football-entities.json`) maintaining canonical definitions for 38 clubs across 8 supported leagues (Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Süper Lig, Saudi Pro League, Primeira Liga).
+   - Sync engine (`syncSupportedLeagues`, `syncLeagueTeams`, `syncTeamSquad`) backed by `FootballDataProvider` (football-data.org API driver) and `MockFootballEntityProvider` for offline snapshots.
 
-3. **Sentence-Level Clause Isolation (`src/lib/news/resolve-transfer-entities.ts`):**
-   - Clause-boundary text parsing (`extractTransferClaims`) prevents cross-sentence entity contamination in multi-rumor roundup articles.
+3. **5-Tier Entity Resolution Fallback Priority (`src/lib/news/resolve-transfer-entities.ts`):**
+   - Resolves transfer subjects with a strict 5-tier fallback hierarchy:
+     $$\text{Explicit Verified Article Evidence} \xrightarrow{\quad} \text{Entity Catalogue} \xrightarrow{\quad} \text{Reviewed Aliases} \xrightarrow{\quad} \text{Legacy Fallback} \xrightarrow{\quad} \text{Unknown}$$
+   - Prevents generic terms like "United" or "City" from falsely triggering club mappings unless surrounding clause context permits.
 
-4. **Grounded Hybrid RAG Pipeline (`src/lib/rag/`):**
-   - Reranking engine combining **40% Semantic Similarity + 25% Keyword Match + 20% Source Reliability + 15% Recency**.
-   - Persistent article storage (`StoredTransferArticle`) with SHA-256 content hashing to avoid duplicate embedding calls. Strict prompt injection protection and Zod output validation (`GroundedTransferAnswer`).
+4. **Clause-Level Sentence Parsing (`extractTransferClaims`):**
+   - Isolates individual sentences and clauses in multi-rumour roundup articles to eliminate cross-contamination of player origin and destination clubs.
 
-5. **Early Signal & Provenance System (`src/lib/news/confidence-progression.ts`):**
-   - Classifies reports into `official_confirmation`, `trusted_report`, `early_signal`, and `secondary_confirmation`.
-   - Tracks reposts/quote posts so repeated insider posts do not count as false independent confirmations.
+5. **Grounded Hybrid RAG Assistant (`src/lib/rag/`):**
+   - Composite weighting retrieval: **40% Semantic Similarity + 25% Keyword Match + 20% Source Reliability + 15% Recency**.
+   - Context sanitization to prevent prompt injection and Zod output schema validation (`GroundedTransferAnswer`).
 
-6. **Machine Learning Microservice (`ml-service/`):**
-   - Python FastAPI microservice using TF-IDF n-gram vectorization (`ngram_range=(1,2)`) and Logistic Regression / Linear SVM classifiers trained on transfer headline patterns.
+6. **Machine Learning Status Classifier (`ml-service/`):**
+   - Python FastAPI microservice utilizing scikit-learn Linear SVM & Logistic Regression with TF-IDF N-gram feature extraction.
 
-7. **Modern Minimal UI Layout:**
-   - 4 top-level items (`Home`, `Leagues`, `Following`, `More`), permanent dark mode, responsive mobile navigation, clean Trending Targets widget, and contextual entity highlight strips.
+7. **Authentic Club Identity System (`src/components/clubs/club-logo.tsx`):**
+   - Native vector SVG and high-resolution PNG crest assets for 38 top clubs, ensuring fallback crest rendering without hotlinking layout shifts.
 
-8. **Admin Route Security Middleware (`src/middleware.ts`):**
-   - Protects `/admin/*` pages and `/api/admin/*` endpoints with session/passcode checks (`ADMIN_SECRET`).
+8. **Deduplicated Notification Engine (`src/lib/notifications/`):**
+   - Generates notifications strictly after verified story updates. Hashes `storyGroupId + eventType` to avoid redundant alerts. In-app bell counter, popover drawer, and dedicated notifications page.
 
 ---
 
 ## 🛠️ Technology Stack
 
 - **Frontend & App Framework:** Next.js 15 App Router, React 19, TypeScript, Tailwind CSS, Lucide Icons.
-- **Backend & Vector Database:** PostgreSQL, `pgvector`, Next.js Server Handlers, In-Memory Repository.
-- **Machine Learning & RAG:** OpenAI (`gpt-4o-mini`, `text-embedding-3-small`), Python 3.11, FastAPI, scikit-learn, TF-IDF, Linear SVM.
-- **Testing:** Vitest (93 passing unit tests across 13 test suites).
+- **Backend & Storage Layer:** Next.js Server API Routes, Persistent JSON & In-Memory Storage, Entity Repository.
+- **Machine Learning & RAG:** Python 3.11, FastAPI, scikit-learn (Linear SVM, Logistic Regression), TF-IDF, OpenAI (`gpt-4o-mini`, `text-embedding-3-small`).
+- **Testing & Quality Assurance:** Vitest (145 passing unit tests across 17 test suites), ESLint 9, TypeScript strict mode.
 
 ---
 
@@ -83,7 +85,7 @@ cd footballTransferTracker
 npm install
 ```
 
-### 3. Configure environment variables
+### 3. Environment configuration
 Copy `.env.example` to `.env.local`:
 ```env
 NEWS_PROVIDERS=bbc-rss,guardian,official-club,manual
@@ -91,22 +93,26 @@ GUARDIAN_API_KEY=
 LLM_PROVIDER=openai
 OPENAI_API_KEY=
 EMBEDDING_PROVIDER=mock
-ADMIN_SECRET=transfer-admin-secret-2026
+FOOTBALL_ENTITY_PROVIDER=mock
+FOOTBALL_DATA_API_KEY=
 ```
 
-### 4. Run automated test suite
-```bash
-npm test
-```
-
-### 5. Start development server
+### 4. Run the development server
 ```bash
 npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### 5. Run test suite & type checking
+```bash
+npm test
+npx tsc --noEmit
+npm run lint
+npm run build
+```
+
 ---
 
-## 🛡️ License
+## 🛡️ License & Trademarks
 
-This project is licensed under the MIT License.
+All club logos and crest assets in `public/clubs/` are used strictly for non-commercial identification and informational purposes within this portfolio project. All news headlines and article snippets are attributed to their original published sources.

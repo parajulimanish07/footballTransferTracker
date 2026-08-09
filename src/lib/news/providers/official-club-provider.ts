@@ -7,7 +7,7 @@ export const officialClubProvider: NewsProvider = {
   enabled: true,
 
   async getTransferNews(options: TransferNewsQuery): Promise<RawNewsArticle[]> {
-    const activeSources = officialClubSources.filter((s) => s.enabled && s.feedUrl && s.ingestionMethod === 'rss');
+    const activeSources = officialClubSources.filter((s) => s.enabled && s.rssUrl && s.ingestionMethod === 'rss');
     const articles: RawNewsArticle[] = [];
 
     const targetSources = options.clubIds?.length
@@ -16,12 +16,12 @@ export const officialClubProvider: NewsProvider = {
 
     await Promise.all(
       targetSources.map(async (source) => {
-        if (!source.feedUrl) return;
+        if (!source.rssUrl) return;
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 2500);
 
         try {
-          const response = await fetch(source.feedUrl, { signal: controller.signal });
+          const response = await fetch(source.rssUrl, { signal: controller.signal });
           if (!response.ok) return;
 
           const xml = await response.text();

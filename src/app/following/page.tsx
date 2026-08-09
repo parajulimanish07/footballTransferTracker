@@ -9,6 +9,7 @@ import { NewsFeed } from '@/components/news/news-feed';
 import { NewsCardSkeleton } from '@/components/news/news-card-skeleton';
 import { useFeedPreference } from '@/hooks/use-feed-preference';
 import { clubs } from '@/config/clubs';
+import { ClubLogo } from '@/components/clubs/club-logo';
 import type { NewsApiResponse, TransferNewsItem } from '@/types/news';
 
 export default function FollowingPage() {
@@ -91,9 +92,9 @@ export default function FollowingPage() {
               followedClubsList.map((club) => (
                 <span
                   key={club.id}
-                  className="inline-flex items-center gap-1 rounded-md border border-slate-800 bg-slate-950 px-2.5 py-1 text-xs font-semibold text-slate-200"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-950 px-2.5 py-1 text-xs font-semibold text-slate-200"
                 >
-                  <ShieldCheck className="h-3 w-3 text-emerald-400" />
+                  <ClubLogo clubId={club.id} size="xs" />
                   <span>{club.name}</span>
                 </span>
               ))

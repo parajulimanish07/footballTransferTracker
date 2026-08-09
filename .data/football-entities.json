@@ -1,0 +1,827 @@
+{
+  "leagues": [
+    {
+      "id": "premier-league",
+      "externalProvider": "mock-entity-provider",
+      "externalId": "PL",
+      "name": "Premier League",
+      "slug": "premier-league",
+      "country": "England",
+      "enabled": true
+    },
+    {
+      "id": "la-liga",
+      "externalProvider": "mock-entity-provider",
+      "externalId": "PD",
+      "name": "La Liga",
+      "slug": "la-liga",
+      "country": "Spain",
+      "enabled": true
+    },
+    {
+      "id": "serie-a",
+      "externalProvider": "mock-entity-provider",
+      "externalId": "SA",
+      "name": "Serie A",
+      "slug": "serie-a",
+      "country": "Italy",
+      "enabled": true
+    },
+    {
+      "id": "bundesliga",
+      "externalProvider": "mock-entity-provider",
+      "externalId": "BL1",
+      "name": "Bundesliga",
+      "slug": "bundesliga",
+      "country": "Germany",
+      "enabled": true
+    },
+    {
+      "id": "ligue-1",
+      "externalProvider": "mock-entity-provider",
+      "externalId": "FL1",
+      "name": "Ligue 1",
+      "slug": "ligue-1",
+      "country": "France",
+      "enabled": true
+    },
+    {
+      "id": "super-lig",
+      "externalProvider": "mock-entity-provider",
+      "externalId": "TSL",
+      "name": "Süper Lig",
+      "slug": "super-lig",
+      "country": "Turkey",
+      "enabled": true
+    },
+    {
+      "id": "saudi-pro-league",
+      "externalProvider": "mock-entity-provider",
+      "externalId": "SPL",
+      "name": "Saudi Pro League",
+      "slug": "saudi-pro-league",
+      "country": "Saudi Arabia",
+      "enabled": true
+    },
+    {
+      "id": "primeira-liga",
+      "externalProvider": "mock-entity-provider",
+      "externalId": "PPL",
+      "name": "Primeira Liga",
+      "slug": "primeira-liga",
+      "country": "Portugal",
+      "enabled": true
+    }
+  ],
+  "clubs": [
+    {
+      "id": "manchester-city",
+      "externalProvider": "mock",
+      "externalId": "65",
+      "name": "Manchester City FC",
+      "slug": "manchester-city",
+      "shortName": "Man City",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/manchester-city.png",
+      "aliases": [
+        "Manchester City",
+        "Man City",
+        "manchester-city",
+        "City"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:55:48.114Z"
+    },
+    {
+      "id": "liverpool",
+      "externalProvider": "config",
+      "externalId": "liverpool",
+      "name": "Liverpool",
+      "slug": "liverpool",
+      "shortName": "Liverpool",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/liverpool.png",
+      "aliases": [
+        "Liverpool",
+        "liverpool",
+        "LFC",
+        "The Reds"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.469Z"
+    },
+    {
+      "id": "real-madrid",
+      "externalProvider": "config",
+      "externalId": "real-madrid",
+      "name": "Real Madrid",
+      "slug": "real-madrid",
+      "shortName": "Real Madrid",
+      "leagueId": "la-liga",
+      "logoPath": "/clubs/real-madrid.png",
+      "aliases": [
+        "Real Madrid",
+        "real-madrid",
+        "Madrid",
+        "Los Blancos"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.469Z"
+    },
+    {
+      "id": "chelsea",
+      "externalProvider": "config",
+      "externalId": "chelsea",
+      "name": "Chelsea",
+      "slug": "chelsea",
+      "shortName": "Chelsea",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/chelsea.png",
+      "aliases": [
+        "Chelsea",
+        "chelsea",
+        "CFC",
+        "Blues"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.469Z"
+    },
+    {
+      "id": "manchester-united",
+      "externalProvider": "config",
+      "externalId": "manchester-united",
+      "name": "Manchester United",
+      "slug": "manchester-united",
+      "shortName": "Man United",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/manchester-united.png",
+      "aliases": [
+        "Manchester United",
+        "Man United",
+        "manchester-united",
+        "Man Utd",
+        "MUFC"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.469Z"
+    },
+    {
+      "id": "arsenal",
+      "externalProvider": "config",
+      "externalId": "arsenal",
+      "name": "Arsenal",
+      "slug": "arsenal",
+      "shortName": "Arsenal",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/arsenal.png",
+      "aliases": [
+        "Arsenal",
+        "arsenal",
+        "Gunners"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.469Z"
+    },
+    {
+      "id": "tottenham-hotspur",
+      "externalProvider": "config",
+      "externalId": "tottenham-hotspur",
+      "name": "Tottenham Hotspur",
+      "slug": "tottenham-hotspur",
+      "shortName": "Spurs",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/tottenham-hotspur.png",
+      "aliases": [
+        "Tottenham Hotspur",
+        "Spurs",
+        "tottenham-hotspur",
+        "Tottenham"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.469Z"
+    },
+    {
+      "id": "atletico-madrid",
+      "externalProvider": "config",
+      "externalId": "atletico-madrid",
+      "name": "Atletico Madrid",
+      "slug": "atletico-madrid",
+      "shortName": "Atlético",
+      "leagueId": "la-liga",
+      "logoPath": "/clubs/atletico-madrid.png",
+      "aliases": [
+        "Atletico Madrid",
+        "Atlético",
+        "atletico-madrid",
+        "Atlético Madrid",
+        "Atletico"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "napoli",
+      "externalProvider": "config",
+      "externalId": "napoli",
+      "name": "Napoli",
+      "slug": "napoli",
+      "shortName": "Napoli",
+      "leagueId": "serie-a",
+      "logoPath": "/clubs/napoli.png",
+      "aliases": [
+        "Napoli",
+        "napoli",
+        "SSC Napoli"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "aston-villa",
+      "externalProvider": "config",
+      "externalId": "aston-villa",
+      "name": "Aston Villa",
+      "slug": "aston-villa",
+      "shortName": "Aston Villa",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/aston-villa.png",
+      "aliases": [
+        "Aston Villa",
+        "aston-villa",
+        "Villa"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "barcelona",
+      "externalProvider": "config",
+      "externalId": "barcelona",
+      "name": "Barcelona",
+      "slug": "barcelona",
+      "shortName": "Barcelona",
+      "leagueId": "la-liga",
+      "logoPath": "/clubs/barcelona.png",
+      "aliases": [
+        "Barcelona",
+        "barcelona",
+        "Barca",
+        "Barça"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "inter",
+      "externalProvider": "config",
+      "externalId": "inter",
+      "name": "Inter",
+      "slug": "inter",
+      "shortName": "Inter",
+      "leagueId": "serie-a",
+      "logoPath": "/clubs/inter.png",
+      "aliases": [
+        "Inter",
+        "inter",
+        "Inter Milan",
+        "Internazionale"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "bayern-munich",
+      "externalProvider": "config",
+      "externalId": "bayern-munich",
+      "name": "Bayern Munich",
+      "slug": "bayern-munich",
+      "shortName": "Bayern",
+      "leagueId": "bundesliga",
+      "logoPath": "/clubs/bayern-munich.png",
+      "aliases": [
+        "Bayern Munich",
+        "Bayern",
+        "bayern-munich",
+        "FC Bayern"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "psg",
+      "externalProvider": "config",
+      "externalId": "psg",
+      "name": "Paris Saint-Germain",
+      "slug": "psg",
+      "shortName": "PSG",
+      "leagueId": "ligue-1",
+      "logoPath": "/clubs/psg.png",
+      "aliases": [
+        "Paris Saint-Germain",
+        "PSG",
+        "psg"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "trabzonspor",
+      "externalProvider": "config",
+      "externalId": "trabzonspor",
+      "name": "Trabzonspor",
+      "slug": "trabzonspor",
+      "shortName": "Trabzonspor",
+      "leagueId": "super-lig",
+      "logoPath": "/clubs/trabzonspor.png",
+      "aliases": [
+        "Trabzonspor",
+        "trabzonspor",
+        "Trabzon"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "galatasaray",
+      "externalProvider": "config",
+      "externalId": "galatasaray",
+      "name": "Galatasaray",
+      "slug": "galatasaray",
+      "shortName": "Galatasaray",
+      "leagueId": "super-lig",
+      "logoPath": "/clubs/galatasaray.png",
+      "aliases": [
+        "Galatasaray",
+        "galatasaray",
+        "Cimbom"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "fenerbahce",
+      "externalProvider": "config",
+      "externalId": "fenerbahce",
+      "name": "Fenerbahce",
+      "slug": "fenerbahce",
+      "shortName": "Fenerbahce",
+      "leagueId": "super-lig",
+      "logoPath": "/clubs/fenerbahce.png",
+      "aliases": [
+        "Fenerbahce",
+        "fenerbahce",
+        "Fenerbahçe",
+        "Fener"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "al-ittihad",
+      "externalProvider": "config",
+      "externalId": "al-ittihad",
+      "name": "Al-Ittihad",
+      "slug": "al-ittihad",
+      "shortName": "Al-Ittihad",
+      "leagueId": "saudi-pro-league",
+      "logoPath": "/clubs/al-ittihad.png",
+      "aliases": [
+        "Al-Ittihad",
+        "al-ittihad",
+        "Ittihad"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "al-nassr",
+      "externalProvider": "config",
+      "externalId": "al-nassr",
+      "name": "Al-Nassr",
+      "slug": "al-nassr",
+      "shortName": "Al-Nassr",
+      "leagueId": "saudi-pro-league",
+      "logoPath": "/clubs/al-nassr.png",
+      "aliases": [
+        "Al-Nassr",
+        "al-nassr",
+        "Al Nassr",
+        "Nassr"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "sporting-cp",
+      "externalProvider": "config",
+      "externalId": "sporting-cp",
+      "name": "Sporting CP",
+      "slug": "sporting-cp",
+      "shortName": "Sporting CP",
+      "leagueId": "primeira-liga",
+      "logoPath": "/clubs/sporting-cp.png",
+      "aliases": [
+        "Sporting CP",
+        "sporting-cp",
+        "Sporting Lisbon",
+        "Sporting"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "newcastle-united",
+      "externalProvider": "config",
+      "externalId": "newcastle-united",
+      "name": "Newcastle United",
+      "slug": "newcastle-united",
+      "shortName": "Newcastle",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/newcastle-united.png",
+      "aliases": [
+        "Newcastle United",
+        "Newcastle",
+        "newcastle-united",
+        "Magpies"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "west-ham-united",
+      "externalProvider": "config",
+      "externalId": "west-ham-united",
+      "name": "West Ham United",
+      "slug": "west-ham-united",
+      "shortName": "West Ham",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/west-ham-united.png",
+      "aliases": [
+        "West Ham United",
+        "West Ham",
+        "west-ham-united",
+        "Hammers"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "brighton",
+      "externalProvider": "config",
+      "externalId": "brighton",
+      "name": "Brighton & Hove Albion",
+      "slug": "brighton",
+      "shortName": "Brighton",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/brighton.png",
+      "aliases": [
+        "Brighton & Hove Albion",
+        "Brighton",
+        "brighton",
+        "Seagulls"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "brentford",
+      "externalProvider": "config",
+      "externalId": "brentford",
+      "name": "Brentford",
+      "slug": "brentford",
+      "shortName": "Brentford",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/brentford.png",
+      "aliases": [
+        "Brentford",
+        "brentford",
+        "Bees"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "crystal-palace",
+      "externalProvider": "config",
+      "externalId": "crystal-palace",
+      "name": "Crystal Palace",
+      "slug": "crystal-palace",
+      "shortName": "Palace",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/crystal-palace.png",
+      "aliases": [
+        "Crystal Palace",
+        "Palace",
+        "crystal-palace",
+        "Eagles"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "everton",
+      "externalProvider": "config",
+      "externalId": "everton",
+      "name": "Everton",
+      "slug": "everton",
+      "shortName": "Everton",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/everton.png",
+      "aliases": [
+        "Everton",
+        "everton",
+        "Toffees"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "fulham",
+      "externalProvider": "config",
+      "externalId": "fulham",
+      "name": "Fulham",
+      "slug": "fulham",
+      "shortName": "Fulham",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/fulham.png",
+      "aliases": [
+        "Fulham",
+        "fulham",
+        "Cottagers"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "wolverhampton-wanderers",
+      "externalProvider": "config",
+      "externalId": "wolverhampton-wanderers",
+      "name": "Wolverhampton Wanderers",
+      "slug": "wolverhampton-wanderers",
+      "shortName": "Wolves",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/wolverhampton-wanderers.png",
+      "aliases": [
+        "Wolverhampton Wanderers",
+        "Wolves",
+        "wolverhampton-wanderers",
+        "Wolverhampton"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "bournemouth",
+      "externalProvider": "config",
+      "externalId": "bournemouth",
+      "name": "Bournemouth",
+      "slug": "bournemouth",
+      "shortName": "Bournemouth",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/bournemouth.png",
+      "aliases": [
+        "Bournemouth",
+        "bournemouth",
+        "AFCB",
+        "Cherries"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "nottingham-forest",
+      "externalProvider": "config",
+      "externalId": "nottingham-forest",
+      "name": "Nottingham Forest",
+      "slug": "nottingham-forest",
+      "shortName": "Forest",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/nottingham-forest.png",
+      "aliases": [
+        "Nottingham Forest",
+        "Forest",
+        "nottingham-forest",
+        "NFFC"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "southampton",
+      "externalProvider": "config",
+      "externalId": "southampton",
+      "name": "Southampton",
+      "slug": "southampton",
+      "shortName": "Southampton",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/southampton.png",
+      "aliases": [
+        "Southampton",
+        "southampton",
+        "Saints"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "juventus",
+      "externalProvider": "config",
+      "externalId": "juventus",
+      "name": "Juventus",
+      "slug": "juventus",
+      "shortName": "Juventus",
+      "leagueId": "serie-a",
+      "logoPath": "/clubs/juventus.png",
+      "aliases": [
+        "Juventus",
+        "juventus",
+        "Juve"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "ac-milan",
+      "externalProvider": "config",
+      "externalId": "ac-milan",
+      "name": "AC Milan",
+      "slug": "ac-milan",
+      "shortName": "Milan",
+      "leagueId": "serie-a",
+      "logoPath": "/clubs/ac-milan.png",
+      "aliases": [
+        "AC Milan",
+        "Milan",
+        "ac-milan",
+        "Rossoneri"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "roma",
+      "externalProvider": "config",
+      "externalId": "roma",
+      "name": "Roma",
+      "slug": "roma",
+      "shortName": "Roma",
+      "leagueId": "serie-a",
+      "logoPath": "/clubs/roma.png",
+      "aliases": [
+        "Roma",
+        "roma",
+        "AS Roma"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "borussia-dortmund",
+      "externalProvider": "config",
+      "externalId": "borussia-dortmund",
+      "name": "Borussia Dortmund",
+      "slug": "borussia-dortmund",
+      "shortName": "Dortmund",
+      "leagueId": "bundesliga",
+      "logoPath": "/clubs/borussia-dortmund.png",
+      "aliases": [
+        "Borussia Dortmund",
+        "Dortmund",
+        "borussia-dortmund",
+        "BVB"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "porto",
+      "externalProvider": "config",
+      "externalId": "porto",
+      "name": "Porto",
+      "slug": "porto",
+      "shortName": "Porto",
+      "leagueId": "primeira-liga",
+      "logoPath": "/clubs/porto.png",
+      "aliases": [
+        "Porto",
+        "porto",
+        "FC Porto"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "benfica",
+      "externalProvider": "config",
+      "externalId": "benfica",
+      "name": "Benfica",
+      "slug": "benfica",
+      "shortName": "Benfica",
+      "leagueId": "primeira-liga",
+      "logoPath": "/clubs/benfica.png",
+      "aliases": [
+        "Benfica",
+        "benfica",
+        "SL Benfica"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    },
+    {
+      "id": "leeds-united",
+      "externalProvider": "config",
+      "externalId": "leeds-united",
+      "name": "Leeds United",
+      "slug": "leeds-united",
+      "shortName": "Leeds",
+      "leagueId": "premier-league",
+      "logoPath": "/clubs/leeds-united.png",
+      "aliases": [
+        "Leeds United",
+        "Leeds",
+        "leeds-united",
+        "LUFC"
+      ],
+      "enabled": true,
+      "updatedAt": "2026-08-07T12:13:48.470Z"
+    }
+  ],
+  "players": [
+    {
+      "id": "p-p-301",
+      "externalProvider": "mock-entity-provider",
+      "externalId": "p-301",
+      "name": "Erling Haaland",
+      "normalizedName": "erling haaland",
+      "aliases": [
+        "Erling Haaland"
+      ],
+      "currentClubId": "manchester-city",
+      "position": "Offence",
+      "nationality": "Norway",
+      "dateOfBirth": "2000-07-21",
+      "updatedAt": "2026-08-07T12:55:50.078Z"
+    },
+    {
+      "id": "p-p-302",
+      "externalProvider": "mock-entity-provider",
+      "externalId": "p-302",
+      "name": "Rodri",
+      "normalizedName": "rodri",
+      "aliases": [
+        "Rodri",
+        "Rodrigo Hernández"
+      ],
+      "currentClubId": "manchester-city",
+      "position": "Midfield",
+      "nationality": "Spain",
+      "dateOfBirth": "1996-06-22",
+      "updatedAt": "2026-08-07T12:55:50.083Z"
+    },
+    {
+      "id": "p-p-303",
+      "externalProvider": "mock-entity-provider",
+      "externalId": "p-303",
+      "name": "James Trafford",
+      "normalizedName": "james trafford",
+      "aliases": [
+        "James Trafford"
+      ],
+      "currentClubId": "manchester-city",
+      "position": "Goalkeeper",
+      "nationality": "England",
+      "dateOfBirth": "2002-10-10",
+      "updatedAt": "2026-08-07T12:55:50.089Z"
+    },
+    {
+      "id": "p-haaland",
+      "externalProvider": "mock",
+      "externalId": "p-301",
+      "name": "Erling Haaland",
+      "normalizedName": "erling haaland",
+      "aliases": [
+        "Haaland"
+      ],
+      "currentClubId": "manchester-city",
+      "position": "Offence",
+      "nationality": "Norway",
+      "dateOfBirth": "2000-07-21",
+      "updatedAt": "2026-08-07T12:55:48.139Z"
+    },
+    {
+      "id": "p-salah",
+      "externalProvider": "mock",
+      "externalId": "p-101",
+      "name": "Mohamed Salah",
+      "normalizedName": "mohamed salah",
+      "aliases": [
+        "Salah"
+      ],
+      "currentClubId": "liverpool",
+      "position": "Offence",
+      "nationality": "Egypt",
+      "dateOfBirth": "1992-06-15",
+      "updatedAt": "2026-08-07T12:55:49.244Z"
+    }
+  ]
+}

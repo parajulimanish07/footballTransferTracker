@@ -108,54 +108,33 @@ export async function predictTransferStatus(options: {
   return fallbackDeterministicPrediction(options.headline, options.description ?? '');
 }
 
+import { classifyTransferStatus, isTransferNews } from '@/lib/news/classify-transfer-status';
+
 /**
  * JS/TS Fallback for Transfer Status Classification
  */
 function fallbackDeterministicPrediction(headline: string, description: string): MLPredictionResult {
-  const text = `${headline} ${description}`.toLowerCase();
-  let prediction: TransferStatus = 'interest';
-  let confidence = 0.70;
-  const reasoningSignals: string[] = [];
+  const isTransfer = isTransferNews(headline, description);
 
-  if (text.includes('official') || text.includes('signed') || text.includes('completes move')) {
-    prediction = 'official';
-    confidence = 0.95;
-    reasoningSignals.push('Keyword "official/signed" detected');
-  } else if (text.includes('here we go') || text.includes('agree deal') || text.includes('agreement in place')) {
-    prediction = 'agreement_reached';
-    confidence = 0.90;
-    reasoningSignals.push('Keyword "here we go/agreement" detected');
-  } else if (text.includes('advanced') || text.includes('closing in') || text.includes('final stages')) {
-    prediction = 'advanced_talks';
-    confidence = 0.85;
-    reasoningSignals.push('Keyword "advanced/closing in" detected');
-  } else if (text.includes('negotiations') || text.includes('in talks') || text.includes('discussing')) {
-    prediction = 'negotiations';
-    confidence = 0.80;
-    reasoningSignals.push('Keyword "negotiations/talks" detected');
-  } else if (text.includes('bid') || text.includes('offer') || text.includes('proposal')) {
-    prediction = 'bid_submitted';
-    confidence = 0.82;
-    reasoningSignals.push('Keyword "bid/offer" detected');
-  } else if (text.includes('approach') || text.includes('contact')) {
-    prediction = 'approach_made';
-    confidence = 0.75;
-    reasoningSignals.push('Keyword "approach/contact" detected');
-  } else if (text.includes('expected to leave') || text.includes('depart')) {
-    prediction = 'departure_expected';
-    confidence = 0.78;
-    reasoningSignals.push('Keyword "expected to leave/depart" detected');
-  } else if (text.includes('interest') || text.includes('monitoring') || text.includes('eyeing')) {
-    prediction = 'interest';
-    confidence = 0.72;
-    reasoningSignals.push('Keyword "interest/monitoring" detected');
+  if (!isTransfer) {
+    return {
+      prediction: 'not_transfer_news',
+      confidence: 0.95,
+      modelVersion: 'non-transfer-filter-v1',
+      reasoningSignals: ['Filtered non-transfer news topic'],
+      ruleOverride: 'Non-Transfer Filter Override',
+      needsReview: false,
+    };
   }
+
+  const prediction = classifyTransferStatus(headline, description, false);
+  const confidence = prediction === 'official' ? 0.95 : prediction === 'agreement_reached' ? 0.90 : 0.82;
 
   return {
     prediction,
     confidence,
     modelVersion: 'deterministic-rule-fallback-v1',
-    reasoningSignals,
+    reasoningSignals: [`Status classified as ${prediction}`],
     ruleOverride: null,
     needsReview: confidence < ML_CONFIDENCE_THRESHOLD,
   };
@@ -199,7 +178,7 @@ function fallbackDuplicateDetection(
   candidates: any[]
 ): DuplicateDetectResponse {
   const results: DuplicatePairResult[] = [];
-  let primaryId = target.id;
+  const primaryId = target.id;
 
   const targetTokens = tokenize(`${target.headline} ${target.description || ''}`);
 

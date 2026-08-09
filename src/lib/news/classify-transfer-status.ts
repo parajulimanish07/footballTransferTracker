@@ -1,13 +1,58 @@
 import type { TransferStatus } from '@/types/news';
 
-const officialWords = ['signs', 'signed', 'completed', 'announces', 'announcement', 'official'];
-const agreementWords = ['agreement reached', 'deal agreed', 'here we go'];
-const advancedTalksWords = ['final stages', 'advanced talks', 'advanced negotiations'];
-const negotiationWords = ['in talks', 'negotiating', 'negotiations', 'talks with'];
-const bidWords = ['bid submitted', 'offer made', 'bid rejected'];
-const approachWords = ['contacted', 'approached', 'approach made', 'make an approach'];
-const interestWords = ['interested', 'monitoring', 'considering', 'target', 'chasing', 'linked', 'keen on', 'move for', 'close to', 'consider a move'];
-const departureWords = ['departure expected', 'expected to leave'];
+const officialWords = [
+  'signs',
+  'signed',
+  'joins',
+  'joined',
+  'completes',
+  'completed',
+  'announces',
+  'announcement',
+  'official',
+  'transfers to',
+  'completed a move',
+  'has completed',
+  'seal move',
+  'seals move',
+  'done deal',
+  'agree new deal',
+  'agreed new deal',
+  'agrees new deal',
+  'agree a new deal',
+  'agree new six-year deal',
+  'agree new contract',
+  'signs new deal',
+  'signed new deal',
+  'new long-term deal',
+  'contract extension',
+  'extends contract',
+];
+
+const agreementWords = [
+  'agreement reached',
+  'deal agreed',
+  'here we go',
+  'agreed terms',
+  'set to join',
+  'agrees to join',
+  'agree deal',
+  'personal terms agreed',
+  'agree new',
+  'agreed new',
+  'agrees new',
+  'agree a new',
+  'agreed a new',
+  'reaches agreement',
+  'reach agreement',
+];
+
+const advancedTalksWords = ['final stages', 'advanced talks', 'advanced negotiations', 'closing in on', 'nearing move'];
+const negotiationWords = ['in talks', 'negotiating', 'negotiations', 'talks with', 'in discussions'];
+const bidWords = ['bid submitted', 'offer made', 'bid rejected', 'submitted bid', 'makes bid', 'bids for', 'bid lodged', 'tabled bid', 'formal offer'];
+const approachWords = ['contacted', 'approached', 'approach made', 'make an approach', 'inquiry made'];
+const interestWords = ['interested', 'monitoring', 'considering', 'target', 'chasing', 'linked', 'keen on', 'move for', 'close to', 'consider a move', 'weighs move', 'decision to make', 'eyeing', 'pursuing', 'gossip', 'rumour', 'rumor', 'paper talk'];
+const departureWords = ['departure expected', 'expected to leave', 'set to depart', 'nearing exit', 'leaving club'];
 
 const transferKeywords = [
   'sign',
@@ -24,7 +69,10 @@ const transferKeywords = [
   'contract',
   'release clause',
   'join',
+  'joins',
+  'joined',
   'leave',
+  'leaving',
   'move to',
   'move for',
   'sell',
@@ -43,12 +91,31 @@ const transferKeywords = [
   'in talks',
   'talks',
   'approach',
+  'decision to make',
+  'good fit at',
 ];
 
 const nonTransferKeywords = [
+  'died',
+  'death',
+  'collapsed',
+  'passed away',
+  'funeral',
+  'tribute',
+  'disciplinary',
+  'proceedings',
+  'fifa president',
+  'investigation',
+  'court',
+  'police',
+  'banned',
+  'suspension',
   'match report',
-  'tactics',
-  'tactical',
+  'player ratings',
+  'guess premier league star',
+  'who am i',
+  'quiz',
+  'trivia',
   'historical',
   'retires',
   'retired',
@@ -56,22 +123,24 @@ const nonTransferKeywords = [
   'injury news',
   'press conference',
   'season review',
-  'player ratings',
+  'national football teams day',
+  'world cup final loss',
+  'apologises for errors',
+  'private investment plans',
   'healing from',
   'revolution',
   'gut feeling to join',
-  'exciting opportunity',
-  'past career',
   'scars',
+  'past career',
+  'exciting opportunity',
 ];
 
 export function isTransferNews(headline: string, summary: string): boolean {
   const text = `${headline} ${summary}`.toLowerCase();
 
-  // Retrospective/profile feature articles without active transfer action words are not transfer news
+  // Non-transfer subjects (tragedy, governance, disciplinary, match reviews, trivia)
   if (nonTransferKeywords.some((word) => text.includes(word))) {
-    // Only pass if there is an explicit active transfer claim verb like "bid", "offer", "gossip", "here we go"
-    const activeTransferVerbs = ['bid', 'offer', 'gossip', 'paper talk', 'rumour', 'rumor', 'here we go', 'make an approach'];
+    const activeTransferVerbs = ['bid', 'offer', 'gossip', 'paper talk', 'rumour', 'rumor', 'here we go', 'make an approach', 'transfers to'];
     if (!activeTransferVerbs.some((v) => text.includes(v))) {
       return false;
     }
@@ -88,9 +157,7 @@ export function classifyTransferStatus(headline: string, summary: string, isOffi
     return 'not_transfer_news';
   }
 
-  if (isOfficial && officialWords.some((word) => text.includes(word))) {
-    return 'official';
-  }
+  if (officialWords.some((word) => text.includes(word))) return 'official';
   if (agreementWords.some((word) => text.includes(word))) return 'agreement_reached';
   if (advancedTalksWords.some((word) => text.includes(word))) return 'advanced_talks';
   if (negotiationWords.some((word) => text.includes(word))) return 'negotiations';

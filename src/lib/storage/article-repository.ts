@@ -96,6 +96,14 @@ export class InMemoryArticleRepository {
     return this.getExportableDataset();
   }
 
+  getAll(): any[] {
+    return Array.from(this.rawArticlesMap.values());
+  }
+
+  getByUrl(url: string): any | null {
+    return Array.from(this.rawArticlesMap.values()).find((a) => a.sourceUrl === url) || null;
+  }
+
   updateProcessedArticle(id: string, updates: any): void {
     const raw = this.rawArticlesMap.get(id);
     if (raw) {

@@ -2,6 +2,8 @@ import type { FilterState } from '@/types/news';
 
 export interface TransferNewsQuery extends FilterState {
   clubIds?: string[];
+  selectedClubId?: string | null;
+  forceRefresh?: boolean;
 }
 
 export interface RawNewsArticle {

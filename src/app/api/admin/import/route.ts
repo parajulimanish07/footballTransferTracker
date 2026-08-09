@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     // Duplicate headline check
     const allArticles = articleRepository.getAll();
     const duplicateHeadline = allArticles.find(
-      (a) => a.headline.toLowerCase() === headline.toLowerCase()
+      (a: any) => a.headline.toLowerCase() === headline.toLowerCase()
     );
     if (duplicateHeadline) {
       return NextResponse.json(

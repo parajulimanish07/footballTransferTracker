@@ -2,20 +2,21 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getClubBySlug } from '@/config/clubs';
 import { getTransferNews } from '@/lib/news/get-transfer-news';
+import { ClubLogo } from '@/components/clubs/club-logo';
 import { NewsFeed } from '@/components/news/news-feed';
 import { TransferSummary } from '@/components/shared/transfer-summary';
 import { AppHeader } from '@/components/layout/app-header';
 import { MobileNavigation } from '@/components/layout/mobile-navigation';
 import { ExternalLink, ShieldCheck } from 'lucide-react';
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const club = getClubBySlug(slug);
   return { title: club ? `${club.name} Transfer News | Verified Reports` : 'Club Transfer News' };
 }
 
-export default async function ClubPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default async function ClubPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const club = getClubBySlug(slug);
   if (!club) notFound();
 
@@ -25,15 +26,20 @@ export default async function ClubPage({ params }: { params: { slug: string } })
     <div className="min-h-screen pb-24">
       <AppHeader />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
-        <section className="glass-panel rounded-3xl p-6 sm:p-8">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-cyan">
-            <ShieldCheck className="h-4 w-4" />
-            <span>{club.league}</span>
+        <section className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
+          <div className="flex items-center gap-4">
+            <ClubLogo clubId={club.id} size="lg" priority />
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-cyan">
+                <ShieldCheck className="h-4 w-4" />
+                <span>{club.league}</span>
+              </div>
+              <h1 className="mt-1 font-display text-3xl font-extrabold text-text sm:text-4xl">
+                {club.name} <span className="text-accent-emerald">Transfer Hub</span>
+              </h1>
+            </div>
           </div>
-          <h1 className="mt-2 font-display text-3xl font-extrabold text-text sm:text-4xl">
-            {club.name} <span className="text-accent-emerald">Transfer Hub</span>
-          </h1>
-          <p className="mt-2 text-sm text-slate-300 max-w-2xl">
+          <p className="text-sm text-slate-300 max-w-2xl">
             {club.description}
           </p>
         </section>

@@ -8,8 +8,8 @@ export const manualProvider: NewsProvider = {
   async getTransferNews(options: TransferNewsQuery): Promise<RawNewsArticle[]> {
     const allRecords = articleRepository.getAll();
     const manualArticles = allRecords
-      .filter((rec) => rec.provider === 'manual')
-      .map((rec): RawNewsArticle => ({
+      .filter((rec: any) => rec.provider === 'manual')
+      .map((rec: any): RawNewsArticle => ({
         externalId: rec.externalId,
         headline: rec.headline,
         description: rec.description,

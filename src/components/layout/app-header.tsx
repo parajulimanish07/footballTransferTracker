@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { NotificationCenter } from '@/components/notifications/notification-center';
 import {
   ArrowRightLeft,
   Globe,
@@ -157,8 +158,9 @@ export function AppHeader() {
           </nav>
         </div>
 
-        {/* Right Status Badge */}
+        {/* Right Actions & Status Badge */}
         <div className="flex items-center gap-3">
+          <NotificationCenter />
           <div className="flex items-center gap-1.5 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-400">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span>Verified Feed</span>

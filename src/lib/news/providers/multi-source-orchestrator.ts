@@ -5,6 +5,7 @@ import { xApiSourceAdapter } from './x-provider';
 import { RssSourceAdapter } from './rss-provider';
 import { isTrustedSource } from '../filter-trusted-sources';
 import { scoreReliability } from '../score-reliability';
+import { calculateReliabilityScore } from '@/config/trusted-sources';
 import { classifyTransferStatus } from '../classify-transfer-status';
 import { resolveTransferEntities } from '../resolve-transfer-entities';
 import { determineEvidenceLevel, detectReportRelationship } from '../confidence-progression';
@@ -96,19 +97,22 @@ export class MultiSourceOrchestrator {
         continue;
       }
 
+      const evidenceLevel = determineEvidenceLevel(raw.sourceType, 'tier_1', raw.headline);
+      const isOfficialEvidence = evidenceLevel === 'official_confirmation';
       const entityRes = resolveTransferEntities(raw.headline, raw.description || '');
-      const transferStatus = classifyTransferStatus(raw.headline, raw.description || '');
+      const transferStatus = classifyTransferStatus(raw.headline, raw.description || '', isOfficialEvidence);
 
       if (transferStatus === 'not_transfer_news') continue;
 
-      const evidenceLevel = determineEvidenceLevel(raw.sourceType, 'tier_1', raw.headline);
-      const relScore = scoreReliability({
-        sourceDomain: raw.sourceDomain || 'unknown',
+      const relLevel = scoreReliability('tier_1', raw.authorName, isOfficialEvidence);
+      const relScore = calculateReliabilityScore({
+        sourceDomain: raw.sourceDomain || 'x.com',
         journalistName: raw.authorName,
-        isOfficial: evidenceLevel === 'official_confirmation',
-        transferStatus,
+        isOfficial: isOfficialEvidence,
         publishedAt: raw.publishedAt,
       });
+
+      const itemDirection = entityRes.destinationClub ? 'incoming' : entityRes.currentClub ? 'outgoing' : 'related';
 
       const item: TransferNewsItem = {
         id: raw.externalId,
@@ -119,12 +123,12 @@ export class MultiSourceOrchestrator {
         currentClub: entityRes.currentClub,
         destinationClub: entityRes.destinationClub,
         relatedClubIds: entityRes.relatedClubIds,
-        direction: entityRes.direction,
+        direction: itemDirection,
         sourceName: raw.sourceName,
         sourceDomain: raw.sourceDomain || 'x.com',
         sourceUrl: raw.originalUrl,
         journalistName: raw.authorName,
-        reliability: relScore.level,
+        reliability: relLevel,
         transferStatus,
         evidenceLevel,
         provenance: {
@@ -140,7 +144,7 @@ export class MultiSourceOrchestrator {
         publishedAt: raw.publishedAt,
         updatedAt: raw.fetchedAt,
         imageUrl: raw.imageUrl,
-        isOfficial: evidenceLevel === 'official_confirmation',
+        isOfficial: isOfficialEvidence,
         duplicateGroupId: null,
       };
 

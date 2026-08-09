@@ -6,7 +6,18 @@ import { parseTransferSearchIntent } from './intent-parser';
 import { articleRepository, StoredTransferArticle } from '../storage/article-repository';
 import { getActiveEmbeddingProvider } from '../embeddings/embedding-provider';
 import { buildArticleEmbeddingText } from '../embeddings/build-article-embedding';
-import type { RAGArticleItem } from './rag-engine';
+
+export interface RAGArticleItem {
+  id: string;
+  headline: string;
+  summary: string;
+  sourceName: string;
+  sourceUrl?: string;
+  publishedAt?: string;
+  playerName?: string | null;
+  clubs?: string[];
+  reliability?: string;
+}
 
 export interface GroundedTransferAnswer {
   answer: string;

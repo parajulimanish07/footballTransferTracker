@@ -3,6 +3,7 @@
 import { Search, Check, Sparkles } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { clubs, popularClubIds } from '@/config/clubs';
+import { ClubLogo } from '@/components/clubs/club-logo';
 
 export function ClubSelector({ value, onChange, multiple = true }: { value: string[]; onChange: (ids: string[]) => void; multiple?: boolean }) {
   const [query, setQuery] = useState('');
@@ -53,14 +54,15 @@ export function ClubSelector({ value, onChange, multiple = true }: { value: stri
                 key={club.id}
                 type="button"
                 onClick={() => toggle(club.id)}
-                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
+                className={`inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
                   isSelected
                     ? 'bg-accent-emerald text-slate-950 shadow-emeraldGlow'
                     : 'border border-white/10 bg-white/5 text-muted hover:text-text hover:bg-white/10'
                 }`}
               >
-                {isSelected && <Check className="h-3.5 w-3.5" />}
+                <ClubLogo clubId={club.id} size="xs" />
                 <span>{club.name}</span>
+                {isSelected && <Check className="h-3.5 w-3.5 ml-0.5" />}
               </button>
             );
           })}
@@ -107,9 +109,12 @@ export function ClubSelector({ value, onChange, multiple = true }: { value: stri
                   : 'border-white/8 bg-white/[0.03] text-text hover:bg-white/8 hover:border-white/15'
               }`}
             >
-              <div>
-                <span className="block font-bold text-sm text-text">{club.name}</span>
-                <span className="block text-slate-400 mt-0.5">{club.league}</span>
+              <div className="flex items-center gap-3">
+                <ClubLogo clubId={club.id} size="sm" />
+                <div>
+                  <span className="block font-bold text-sm text-text">{club.name}</span>
+                  <span className="block text-slate-400 stroke-none mt-0.5">{club.league}</span>
+                </div>
               </div>
               <div
                 className={`flex h-6 w-6 items-center justify-center rounded-full border transition-all ${
