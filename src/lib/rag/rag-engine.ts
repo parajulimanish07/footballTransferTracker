@@ -6,6 +6,7 @@ import { parseTransferSearchIntent } from './intent-parser';
 import { articleRepository, StoredTransferArticle } from '../storage/article-repository';
 import { getActiveEmbeddingProvider } from '../embeddings/embedding-provider';
 import { buildArticleEmbeddingText } from '../embeddings/build-article-embedding';
+import { resolveTransferEntities } from '../news/resolve-transfer-entities';
 
 export interface RAGArticleItem {
   id: string;
@@ -16,6 +17,8 @@ export interface RAGArticleItem {
   publishedAt?: string;
   playerName?: string | null;
   clubs?: string[];
+  currentClubId?: string | null;
+  destinationClubId?: string | null;
   reliability?: string;
 }
 
@@ -44,6 +47,11 @@ export async function queryRAGAssistant(
   const embeddingProvider = getActiveEmbeddingProvider();
   for (const item of liveArticles) {
     if (item.id && item.headline) {
+      const resolved = resolveTransferEntities(item.headline, item.summary || '');
+      const playerName = item.playerName || resolved.playerName || null;
+      const currentClubId = item.currentClubId || resolved.currentClub?.id || null;
+      const destinationClubId = item.destinationClubId || resolved.destinationClub?.id || (item.clubs?.[0] || null);
+
       const stored = await articleRepository.saveArticle({
         id: item.id,
         provider: 'live-feed',
@@ -56,9 +64,9 @@ export async function queryRAGAssistant(
         sourceName: item.sourceName,
         sourceDomain: item.sourceName.toLowerCase().replace(/\s+/g, ''),
         journalistName: null,
-        playerName: item.playerName || null,
-        currentClubId: null,
-        destinationClubId: item.clubs?.[0] || null,
+        playerName,
+        currentClubId,
+        destinationClubId,
         interestedClubId: null,
         leagueId: null,
         transferStatus: (item.reliability === 'official' ? 'official' : 'negotiations') as TransferStatus,
@@ -126,9 +134,13 @@ export async function queryRAGAssistant(
   const RAG_QUESTION_STOP_WORDS = new Set([
     'which', 'who', 'what', 'where', 'when', 'why', 'how', 'does', 'do', 'did', 'is', 'are', 'was', 'were',
     'has', 'have', 'had', 'will', 'would', 'could', 'should', 'can', 'may', 'might', 'must', 'signed', 'sign',
-    'signing', 'for', 'the', 'club', 'team', 'player', 'players', 'target', 'targets', 'strikers', 'striker',
-    'forwards', 'forward', 'wingers', 'winger', 'midfielders', 'midfielder', 'defenders', 'defender',
-    'transfers', 'transfer', 'news', 'reports', 'about', 'tell', 'me', 'show', 'trying', 'want', 'wants', 'been', 'being', 'with', 'from', 'into', 'over'
+    'signing', 'signs', 'join', 'joined', 'joining', 'joins', 'move', 'moved', 'moving', 'moves', 'switch', 'switched',
+    'heading', 'heads', 'headed', 'for', 'the', 'club', 'team', 'player', 'players', 'target', 'targets',
+    'strikers', 'striker', 'forwards', 'forward', 'wingers', 'winger', 'midfielders', 'midfielder', 'defenders', 'defender',
+    'full', 'back', 'fullback', 'centre', 'center', 'left', 'right', 'deal', 'deals', 'agree', 'agreed', 'agrees', 'agreement',
+    'transfers', 'transfer', 'news', 'reports', 'reported', 'about', 'tell', 'me', 'show', 'trying', 'want', 'wants', 'been', 'being',
+    'with', 'from', 'into', 'over', 'this', 'that', 'latest', 'recent', 'update', 'updates', 'confirm', 'confirmed',
+    'milan', 'england', 'english', 'italy', 'italian', 'spain', 'spanish', 'today', 'now', 'currently'
   ]);
 
   const unlistedTerms = qLower

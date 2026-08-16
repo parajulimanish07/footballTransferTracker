@@ -25,7 +25,7 @@ interface ChatMessage {
 export function RAGAssistantWidget({
   articles,
 }: {
-  articles: Array<{ id: string; headline: string; summary: string; sourceName: string; sourceUrl: string }>;
+  articles: Array<any>;
 }) {
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);

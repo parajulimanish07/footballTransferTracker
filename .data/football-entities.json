@@ -90,7 +90,7 @@
         "City"
       ],
       "enabled": true,
-      "updatedAt": "2026-08-07T12:55:48.114Z"
+      "updatedAt": "2026-08-16T06:09:17.673Z"
     },
     {
       "id": "liverpool",
@@ -760,7 +760,7 @@
       "position": "Offence",
       "nationality": "Norway",
       "dateOfBirth": "2000-07-21",
-      "updatedAt": "2026-08-07T12:55:50.078Z"
+      "updatedAt": "2026-08-16T06:09:19.954Z"
     },
     {
       "id": "p-p-302",
@@ -776,7 +776,7 @@
       "position": "Midfield",
       "nationality": "Spain",
       "dateOfBirth": "1996-06-22",
-      "updatedAt": "2026-08-07T12:55:50.083Z"
+      "updatedAt": "2026-08-16T06:09:19.957Z"
     },
     {
       "id": "p-p-303",
@@ -791,7 +791,7 @@
       "position": "Goalkeeper",
       "nationality": "England",
       "dateOfBirth": "2002-10-10",
-      "updatedAt": "2026-08-07T12:55:50.089Z"
+      "updatedAt": "2026-08-16T06:09:19.959Z"
     },
     {
       "id": "p-haaland",
@@ -806,7 +806,7 @@
       "position": "Offence",
       "nationality": "Norway",
       "dateOfBirth": "2000-07-21",
-      "updatedAt": "2026-08-07T12:55:48.139Z"
+      "updatedAt": "2026-08-16T06:09:17.830Z"
     },
     {
       "id": "p-salah",
@@ -821,7 +821,7 @@
       "position": "Offence",
       "nationality": "Egypt",
       "dateOfBirth": "1992-06-15",
-      "updatedAt": "2026-08-07T12:55:49.244Z"
+      "updatedAt": "2026-08-16T06:09:19.037Z"
     }
   ]
 }

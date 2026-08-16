@@ -1,6 +1,7 @@
 import type { TransferStatus } from '@/types/news';
 import { clubs } from '@/config/clubs';
 import { leagues } from '@/config/leagues';
+import { resolveTransferEntities } from '@/lib/news/resolve-transfer-entities';
 
 export interface TransferSearchIntent {
   questionType:
@@ -38,22 +39,29 @@ export function parseTransferSearchIntent(question: string): TransferSearchInten
 
   // 2. Identify Player Name
   let playerName: string | null = null;
-  const knownPlayers = [
-    'Victor Osimhen',
-    'Jack Grealish',
-    'Rodri',
-    'Riccardo Calafiori',
-    'Declan Rice',
-    'Cody Gakpo',
-    'Darwin Nunez',
-    'Kylian Mbappe',
-    'Joshua Zirkzee',
-  ];
+  const entityResolved = resolveTransferEntities(question, '');
+  if (entityResolved.playerName) {
+    playerName = entityResolved.playerName;
+  } else {
+    const knownPlayers = [
+      'Victor Osimhen',
+      'Jack Grealish',
+      'Rodri',
+      'Riccardo Calafiori',
+      'Declan Rice',
+      'Cody Gakpo',
+      'Darwin Nunez',
+      'Kylian Mbappe',
+      'Joshua Zirkzee',
+      'Djed Spence',
+      'Spence',
+    ];
 
-  for (const name of knownPlayers) {
-    if (q.includes(name.toLowerCase())) {
-      playerName = name;
-      break;
+    for (const name of knownPlayers) {
+      if (q.includes(name.toLowerCase())) {
+        playerName = name;
+        break;
+      }
     }
   }
 

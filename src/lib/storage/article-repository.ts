@@ -1,4 +1,5 @@
 import type { TransferStatus } from '@/types/news';
+import { clubs } from '@/config/clubs';
 import crypto from 'crypto';
 
 export interface StoredTransferArticle {
@@ -170,7 +171,12 @@ export class InMemoryArticleRepository {
 
     if (filters.playerName) {
       const p = filters.playerName.toLowerCase();
-      result = result.filter((a) => a.playerName && a.playerName.toLowerCase().includes(p));
+      result = result.filter(
+        (a) =>
+          (a.playerName && a.playerName.toLowerCase().includes(p)) ||
+          a.headline.toLowerCase().includes(p) ||
+          (a.description && a.description.toLowerCase().includes(p))
+      );
     }
 
     if (filters.clubIds?.length) {
@@ -179,7 +185,14 @@ export class InMemoryArticleRepository {
         (a) =>
           (a.currentClubId && cSet.has(a.currentClubId)) ||
           (a.destinationClubId && cSet.has(a.destinationClubId)) ||
-          (a.interestedClubId && cSet.has(a.interestedClubId))
+          (a.interestedClubId && cSet.has(a.interestedClubId)) ||
+          filters.clubIds!.some((cid) => {
+            const club = clubs.find((c) => c.id === cid);
+            const text = `${a.headline} ${a.description || ''}`.toLowerCase();
+            return club
+              ? text.includes(club.name.toLowerCase()) || club.aliases.some((alias) => text.includes(alias.toLowerCase()))
+              : text.includes(cid.replace(/-/g, ' '));
+          })
       );
     }
 

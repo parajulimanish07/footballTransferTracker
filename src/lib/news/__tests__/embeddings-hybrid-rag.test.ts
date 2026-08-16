@@ -287,4 +287,46 @@ describe('Embeddings, Vector DB, & Grounded Hybrid RAG Architecture Tests', () =
     const telemetry = await articleRepository.getTelemetry();
     expect(telemetry.vectorSearchLatencyMs).toBeGreaterThanOrEqual(0);
   });
+
+  it('21. Live article Spence full-back transfer query to Inter Milan returns verified grounded answer', async () => {
+    const liveItem = {
+      id: 'spence-inter-1',
+      headline: 'Inter sign England full-back Spence from Tottenham',
+      summary: 'England full-back Djed Spence signs a five-year deal at Inter Milan as he makes a move to Italy from Tottenham.',
+      sourceName: 'BBC Sport',
+      reliability: 'official',
+    };
+
+    const answer = await queryRAGAssistant('Inter sign England full-back Spence from Tottenham', [liveItem]);
+    expect(answer.insufficientEvidence).toBe(false);
+    expect(answer.evidenceArticleIds).toContain('spence-inter-1');
+  });
+
+  it('22. Natural question Has Djed Spence joined Inter Milan returns grounded answer', async () => {
+    const liveItem = {
+      id: 'spence-inter-1',
+      headline: 'Inter sign England full-back Spence from Tottenham',
+      summary: 'England full-back Djed Spence signs a five-year deal at Inter Milan as he makes a move to Italy from Tottenham.',
+      sourceName: 'BBC Sport',
+      reliability: 'official',
+    };
+
+    const answer = await queryRAGAssistant('Has Djed Spence joined Inter Milan?', [liveItem]);
+    expect(answer.insufficientEvidence).toBe(false);
+    expect(answer.evidenceArticleIds).toContain('spence-inter-1');
+  });
+
+  it('23. Natural question Is Spence moving to Inter returns grounded answer', async () => {
+    const liveItem = {
+      id: 'spence-inter-1',
+      headline: 'Inter sign England full-back Spence from Tottenham',
+      summary: 'England full-back Djed Spence signs a five-year deal at Inter Milan as he makes a move to Italy from Tottenham.',
+      sourceName: 'BBC Sport',
+      reliability: 'official',
+    };
+
+    const answer = await queryRAGAssistant('Is Spence moving to Inter?', [liveItem]);
+    expect(answer.insufficientEvidence).toBe(false);
+    expect(answer.evidenceArticleIds).toContain('spence-inter-1');
+  });
 });
