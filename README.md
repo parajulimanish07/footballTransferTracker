@@ -1,6 +1,6 @@
 # Football Transfer Intelligence Platform ⚽🤖
 
-A AI-powered football transfer intelligence platform built with **Next.js 15 App Router**, **React 19**, **TypeScript**, **Tailwind CSS**, **Python FastAPI ML**, **Grounded Hybrid RAG**, **Dynamic Football Entity Catalogue**, and **Multi-Source Ingestion Orchestration**.
+An AI-powered football transfer intelligence platform built with **Next.js 15 App Router**, **React 19**, **TypeScript**, **Tailwind CSS**, **Python FastAPI ML**, **Grounded Hybrid RAG**, **Dynamic Football Entity Catalogue**, and **Multi-Source Ingestion Orchestration**.
 
 The platform aggregates verified transfer reports from trusted newspapers, official club press releases, and insider social posts, filtering out unverified clickbait and categorizing rumours by transfer stage, entity confidence, and source reliability.
 
