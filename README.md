@@ -1,6 +1,6 @@
 # Football Transfer Intelligence Platform ⚽🤖
 
-A portfolio-ready AI-powered football transfer intelligence platform built with **Next.js 15 App Router**, **React 19**, **TypeScript**, **Tailwind CSS**, **Python FastAPI ML**, **Grounded Hybrid RAG**, **Dynamic Football Entity Catalogue**, and **Multi-Source Ingestion Orchestration**.
+A AI-powered football transfer intelligence platform built with **Next.js 15 App Router**, **React 19**, **TypeScript**, **Tailwind CSS**, **Python FastAPI ML**, **Grounded Hybrid RAG**, **Dynamic Football Entity Catalogue**, and **Multi-Source Ingestion Orchestration**.
 
 The platform aggregates verified transfer reports from trusted newspapers, official club press releases, and insider social posts, filtering out unverified clickbait and categorizing rumours by transfer stage, entity confidence, and source reliability.
 
@@ -115,4 +115,4 @@ npm run build
 
 ## 🛡️ License & Trademarks
 
-All club logos and crest assets in `public/clubs/` are used strictly for non-commercial identification and informational purposes within this portfolio project. All news headlines and article snippets are attributed to their original published sources.
+All club logos and crest assets in `public/clubs/` are used strictly for non-commercial identification and informational purposes within this project. All news headlines and article snippets are attributed to their original published sources.
